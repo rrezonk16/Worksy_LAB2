@@ -32,10 +32,8 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // Set role_id to 1
         $roleId = 1;
 
-        // Create the user
         $user = User::create([
             'name' => $request->name,
             'surname' => $request->surname,
@@ -83,7 +81,6 @@ class UserController extends Controller
 
         $user = Auth::user();
 
-        // Find existing details or create a new entry
         $userDetail = UserDetail::updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -119,10 +116,8 @@ class UserController extends Controller
 
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
-            // Generate a token for the user
             $token = $user->createToken('Worksy')->plainTextToken;
 
-            // Fetch permissions for the user's role
             $permissions = $user->role->permissions->pluck('name');
 
             return response()->json([
@@ -150,7 +145,6 @@ class UserController extends Controller
             return response()->json(['message' => 'Forbidden: You do not have permission to view users.'], 403);
         }
 
-        // Retrieve all users with their roles and details
         $users = User::with(['role', 'details'])->get();
 
         return response()->json([
@@ -225,7 +219,7 @@ class UserController extends Controller
     
     public function updateMyUserData(Request $request)
 {
-    $user = Auth::user(); // Get the authenticated user
+    $user = Auth::user(); 
 
     $validator = Validator::make($request->all(), [
         'name' => 'nullable|string|max:255',
@@ -239,7 +233,6 @@ class UserController extends Controller
         return response()->json(['errors' => $validator->errors()], 422);
     }
 
-    // Update user details
     $user->update([
         'name' => $request->name ?? $user->name,
         'surname' => $request->surname ?? $user->surname,

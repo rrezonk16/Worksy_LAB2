@@ -15,10 +15,15 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\Auth\UserController;
+use App\Http\Controllers\Company\CompanyController;
+use App\Http\Controllers\CompanyUserLoginController;
+use App\Http\Controllers\ApplyForVerificationController;
 
 //Open routes i vendos ketu
 Route::post('register/user', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
+Route::post('register/company', [CompanyController::class, 'register']);
+Route::post('company-user/login', [CompanyUserLoginController::class, 'login']);
 
 //Protected routes i vendos ketu
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -29,3 +34,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:EDIT_USERS');
     Route::delete('users/{id}', [UserController::class, 'softDeleteUser'])->middleware('permission:DELETE_USERS');
 });
+
+use App\Http\Controllers\CompanyVerificationController;
+
+Route::middleware('auth:sanctum')->post('apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
