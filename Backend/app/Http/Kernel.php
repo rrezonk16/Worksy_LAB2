@@ -6,6 +6,12 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
 {
+
+    protected $routeMiddleware = [
+        'auth' => \App\Http\Middleware\Authenticate::class,
+        'permission' => \App\Http\Middleware\CheckPermission::class, // Register the middleware
+    ];
+    
     /**
      * The application's global HTTP middleware stack.
      *
