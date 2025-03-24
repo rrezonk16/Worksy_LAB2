@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\CompanyUserLoginController;
-use App\Http\Controllers\ApplyForVerificationController;
+use App\Http\Controllers\CompanyVerificationController;
 
 //Open routes i vendos ketu
 Route::post('register/user', [UserController::class, 'register']);
@@ -33,8 +33,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('users/me', [UserController::class, 'updateMyUserData']);
     Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:EDIT_USERS');
     Route::delete('users/{id}', [UserController::class, 'softDeleteUser'])->middleware('permission:DELETE_USERS');
+    Route::get('/company-verification/{companyId}', [CompanyVerificationController::class, 'getCompanyVerification']);
+    Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:ACTIVATE_COMPANY_VERIFICATION');
+    Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
+    Route::get('/companies', [CompanyVerificationController::class, 'getCompanies']);
 });
 
-use App\Http\Controllers\CompanyVerificationController;
 
 Route::middleware('auth:sanctum')->post('apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
