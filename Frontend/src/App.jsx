@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import Error404 from "./Components/ErrorPages/Error404";
 import Register from "./Components/Auth/Register";
 import Login from "./Components/Auth/Login";
@@ -6,8 +6,7 @@ import AdminInternalPanel from "./Components/Admin/Intern/AdminInternalPanel";
 import Main from "./Components/Main/Main";
 import CompanyVerificationForm from "./Components/Auth/CompanyVerificationForm";
 import CompanyPanelLogin from "./Components/Auth/CompanyPanelLogin";
-;
-
+import isLoggedIn from "./Components/Functions/isLoggedIn";
 
 const routes = [
   {
@@ -32,7 +31,7 @@ const routes = [
   },
   {
     path: "/Admin/Internal/Panel",
-    element: <AdminInternalPanel/>
+    element: isLoggedIn() ? <AdminInternalPanel/> : <Navigate to="/login"/>
   },
   {
     path: "/*",
@@ -40,14 +39,11 @@ const routes = [
   }
 ];
 
-
 function App() {
   
   return (
     <Router>
-
       <div>
-
         <Routes>
           {routes.map((route, index) => (
             <Route key={index} path={route.path} element={route.element} />

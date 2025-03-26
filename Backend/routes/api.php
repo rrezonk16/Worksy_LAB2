@@ -37,7 +37,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:ACTIVATE_COMPANY_VERIFICATION');
     Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
     Route::get('/companies', [CompanyVerificationController::class, 'getCompanies']);
+    Route::post('/apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
+    Route::get('/get-my-permissions', [UserController::class, 'getMyPermissions']);
 });
 
 
-Route::middleware('auth:sanctum')->post('apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
+

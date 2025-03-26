@@ -16,7 +16,6 @@ class CompanyVerification extends Model
         'owner_id_back',
     ];
 
-    // Define the relationship with the Company model
     public function company()
     {
         return $this->belongsTo(Company::class);

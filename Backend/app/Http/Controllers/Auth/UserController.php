@@ -135,6 +135,18 @@ class UserController extends Controller
         }
     }
 
+    public function getMyPermissions()
+    {
+        $user = Auth::user();
+
+        $permissions = $user->role->permissions->pluck('name');
+
+        return response()->json([
+            'message' => 'Permissions retrieved successfully!',
+            'permissions' => $permissions
+        ], 200);
+    }
+
     public function getAllUsers()
     {
         $user = Auth::user();

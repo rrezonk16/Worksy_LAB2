@@ -2,19 +2,19 @@
 
 Projekt per Lënda Laboratorike 2
 
-
-
 ## Grupi
+
 - Rrezon Krasniqi
 - Flaka Paloja
 - Erzen Citaku
-- Eron Azemi 
+- Eron Azemi
 
 ## Ligjëruesi
+
 - Prof. Blerim Zylfiu
 
-
 ## 🚀 Reth projektit
+
 Ky projekt ka për qëllim zhvillimin e një web aplikacioni i cili do të mundësojë lidhjen e punëkërkuesve me punëdhënësit online. Çdo kompani ose individ do të ketë mundësinë të krijojë një listim pune, qoftë për afatgjatë apo afatshkurtër.
 
 ## Hape projektin ne kompjuterin tuaj
@@ -32,6 +32,7 @@ Beje projektin clone nga Github
   //backend Laravel PHP code
     cd Backend
     composer install
+    php artisan storage:link
     php artisan migrate
     php artisan db:seed
     php artisan serve
@@ -44,6 +45,3 @@ Beje projektin clone nga Github
 **Backend:** Laravel
 
 **Database:** MySQL and MongoDB
-
-
-

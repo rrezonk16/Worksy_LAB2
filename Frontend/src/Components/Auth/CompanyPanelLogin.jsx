@@ -30,10 +30,8 @@ const CompanyPanelLogin = () => {
 
       const { token } = response.data;
 
-      // Save token in localStorage
       localStorage.setItem("company_user_token", token);
 
-      // Redirect to dashboard
       navigate("/company/dashboard");
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Please try again.");

@@ -29,9 +29,10 @@ class CompanyVerificationController extends Controller
             'owner_id_back' => 'required|mimes:jpeg,png,pdf,jpg|max:2048',
         ]);
 
-        $certificatePath = $request->file('company_certificate')->store('company_verifications');
-        $ownerIdFrontPath = $request->file('owner_id_front')->store('company_verifications');
-        $ownerIdBackPath = $request->file('owner_id_back')->store('company_verifications');
+        $certificatePath = $request->file('company_certificate')->store('public/company_verifications');
+        $ownerIdFrontPath = $request->file('owner_id_front')->store('public/company_verifications');
+        $ownerIdBackPath = $request->file('owner_id_back')->store('public/company_verifications');
+
 
         if ($verification) {
             $verification->update([
@@ -67,19 +68,34 @@ class CompanyVerificationController extends Controller
         return response()->json([
             'company_id' => $verification->company_id,
             'status' => $verification->status,
-            'company_certificate_url' => asset("storage/{$verification->company_certificate_url}"),
-            'owner_id_front' => asset("storage/{$verification->owner_id_front}"),
-            'owner_id_back' => asset("storage/{$verification->owner_id_back}"),
+            'company_certificate_url' => asset(str_replace('public/', 'storage/', $verification->company_certificate_url)),
+            'owner_id_front' => asset(str_replace('public/', 'storage/', $verification->owner_id_front)),
+            'owner_id_back' => asset(str_replace('public/', 'storage/', $verification->owner_id_back)),
         ], 200);
     }
 
     public function getCompanies()
     {
-        $companies = CompanyVerification::all();
+        $companies = CompanyVerification::with('company')->get();
 
-        return response()->json($companies, 200);
+        $result = $companies->map(function ($verification) {
+            return [
+                'verification_id' => $verification->id,
+                'company_id' => $verification->company_id,
+                'status' => $verification->status,
+                'company_name' => $verification->company->name,
+                'company_nui' => $verification->company->nui,
+                'company_email' => $verification->company->email,
+                'company_phone_number' => $verification->company->phone_number,
+                'company_certificate_url' => asset(str_replace('public/', 'storage/', $verification->company_certificate_url)),
+                'owner_id_front' => asset(str_replace('public/', 'storage/', $verification->owner_id_front)),
+                'owner_id_back' => asset(str_replace('public/', 'storage/', $verification->owner_id_back)),
+            ];
+        });
+
+        return response()->json($result, 200);
     }
-   
+
 
     public function activateVerification($companyId)
     {

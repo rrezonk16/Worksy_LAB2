@@ -1,211 +1,228 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { AgGridReact } from "ag-grid-react";
 
 const VerifyCompanies = () => {
   const [companies, setCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [verificationDetails, setVerificationDetails] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Fetch companies data
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:8000/api/companies', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+          "http://localhost:8000/api/companies",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         setCompanies(response.data);
       } catch (error) {
-        console.error('Error fetching companies:', error);
+        console.error("Error fetching companies:", error);
       }
     };
 
     fetchCompanies();
   }, []);
 
-  const fetchCompanyVerification = async (companyId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/api/company-verification/${companyId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      setVerificationDetails(response.data);
-      setCurrentImageIndex(0); // Reset the slider to the first image
-    } catch (error) {
-      console.error('Error fetching verification details:', error);
-    }
-  };
-
-  const handleActivateClick = (companyId) => {
+  const handleActivateClick = (company) => {
     setIsModalOpen(true);
-    setSelectedCompany(companyId);
-    fetchCompanyVerification(companyId);
+    setSelectedCompany(company); // Use the whole company object
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedCompany(null);
-    setVerificationDetails(null);
-  };
-
-  const goToNextImage = () => {
-    if (verificationDetails) {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % getImages().length);
-    }
-  };
-
-  const goToPrevImage = () => {
-    if (verificationDetails) {
-      setCurrentImageIndex((prevIndex) => (prevIndex - 1 + getImages().length) % getImages().length);
-    }
-  };
-
-  const getImages = () => {
-    const images = [];
-    if (verificationDetails?.company_certificate_url) {
-      images.push(`${verificationDetails.company_certificate_url}`);
-    }
-    if (verificationDetails?.owner_id_front) {
-      images.push(`${verificationDetails.owner_id_front}`);
-    }
-    if (verificationDetails?.owner_id_back) {
-      images.push(`${verificationDetails.owner_id_back}`);
-    }
-    return images;
   };
 
   const handleApprove = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:8000/api/company-verification/${selectedCompany}/activate`,
+        `http://localhost:8000/api/company-verification/${selectedCompany.company_id}/activate`,
         {},
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      alert('Verification approved!');
+      alert("Verification approved!");
       closeModal();
     } catch (error) {
-      console.error('Error approving verification:', error);
+      console.error("Error approving verification:", error);
     }
   };
 
   const handleRefuse = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       await axios.post(
-        `http://localhost:8000/api/company-verification/${selectedCompany}/refuse`,
+        `http://localhost:8000/api/company-verification/${selectedCompany.company_id}/refuse`,
         {},
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
-      alert('Verification refused!');
+      alert("Verification refused!");
       closeModal();
     } catch (error) {
-      console.error('Error refusing verification:', error);
+      console.error("Error refusing verification:", error);
     }
   };
+
+  const columnDefs = [
+    {
+      headerName: "Company ID",
+      field: "company_id",
+      filter: true,
+      sortable: true,
+    },
+    {
+      headerName: "Company Name",
+      field: "company_name",
+      filter: true,
+      sortable: true,
+    },
+    {
+      headerName: "Company NUI",
+      field: "company_nui",
+      filter: true,
+      sortable: true,
+    },
+    {
+      headerName: "Company Email",
+      field: "company_email",
+      filter: true,
+      sortable: true,
+    },
+    {
+      headerName: "Company Phone",
+      field: "company_phone_number",
+      filter: true,
+      sortable: true,
+    },
+    { headerName: "Status", field: "status", filter: true, sortable: true },
+    {
+      headerName: "Actions",
+      field: "actions",
+      cellRenderer: (params) => {
+        if (params.data.status === "uploaded") {
+          return (
+            <button
+              onClick={() => handleActivateClick(params.data)}
+              className="bg-blue-500 text-white p-2 rounded mt-1 h-8 w-20 text-center cursor-pointer items-center flex justify-center"
+            >
+              Activate
+            </button>
+          );
+        }
+        return null;
+      },
+    },
+  ];
 
   return (
     <div className="mt-12">
       <h1>Verify Companies</h1>
-      <table className="table-auto border-collapse border border-gray-200 w-full">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 p-2">Company ID</th>
-            <th className="border border-gray-300 p-2">Status</th>
-            <th className="border border-gray-300 p-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {companies.map((company) => (
-            <tr key={company.id}>
-              <td className="border border-gray-300 p-2">{company.company_id}</td>
-              <td className="border border-gray-300 p-2">{company.status}</td>
-              <td className="border border-gray-300 p-2">
-                {company.status === 'uploaded' && (
-                  <button
-                    onClick={() => handleActivateClick(company.id)}
-                    className="bg-blue-500 text-white p-2 rounded"
-                  >
-                    Activate
-                  </button>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      <div
+        className="ag-theme-alpine"
+        style={{ height: "1000px", width: "100%" }}
+      >
+        <AgGridReact
+          rowData={companies}
+          columnDefs={columnDefs}
+          domLayout="autoHeight"
+          pagination={true}
+          enableFilter={true}
+          enableSorting={true}
+          getRowStyle={(params) => {
+            if (params.data.status === "approved") {
+              return { backgroundColor: "#d4edda" }; 
+            } else if (params.data.status === "rejected") {
+              return { backgroundColor: "#f8d7da" }; // Light red for rejected
+            }
+            return {}; // Default style
+          }}
+        />
+      </div>
 
       {/* Modal */}
-      {isModalOpen && verificationDetails && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg max-w-lg w-full">
-            <h2 className="text-xl font-semibold">Company Verification</h2>
-            <div className="my-4">
-              <h3 className="font-medium">Uploaded Photos</h3>
-              <div className="relative">
-                {/* Image Slider */}
-                <div className="flex justify-center items-center">
+      {isModalOpen && selectedCompany && (
+        <div className="fixed inset-0 flex justify-center items-center p-4">
+          <div className="bg-white p-6 rounded-2xl shadow-xl max-w-lg w-full relative">
+            <h2 className="text-2xl font-bold text-gray-800 text-center">
+              Company Verification
+            </h2>
+
+            <div className="mt-6">
+              <h3 className="text-lg font-medium text-gray-700">
+                Uploaded Photos
+              </h3>
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                {selectedCompany.company_certificate_url && (
                   <button
-                    onClick={goToPrevImage}
-                    className="absolute left-0 bg-gray-500 text-white p-2 rounded-full"
+                    onClick={() =>
+                      window.open(
+                        selectedCompany.company_certificate_url,
+                        "_blank"
+                      )
+                    }
+                    className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow-md transition-all"
                   >
-                    &#10094;
+                    Company Certificate
                   </button>
-                  <img
-                    src={getImages()[currentImageIndex]}
-                    alt="Verification"
-                    className="w-full h-auto max-w-2xl rounded-lg object-contain"
-                  />
+                )}
+                {selectedCompany.owner_id_front && (
                   <button
-                    onClick={goToNextImage}
-                    className="absolute right-0 bg-gray-500 text-white p-2 rounded-full"
+                    onClick={() =>
+                      window.open(selectedCompany.owner_id_front, "_blank")
+                    }
+                    className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow-md transition-all"
                   >
-                    &#10095;
+                    ID Front
                   </button>
-                </div>
-                <div className="flex justify-center gap-2 mt-2">
-                  {getImages().map((_, index) => (
-                    <div
-                      key={index}
-                      className={`w-3 h-3 rounded-full ${index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-400'}`}
-                    ></div>
-                  ))}
-                </div>
+                )}
+                {selectedCompany.owner_id_back && (
+                  <button
+                    onClick={() =>
+                      window.open(selectedCompany.owner_id_back, "_blank")
+                    }
+                    className="bg-blue-600 cursor-pointer hover:bg-blue-700 text-white py-2 px-4 rounded-lg shadow-md transition-all"
+                  >
+                    ID Back
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Approval and Refusal Buttons */}
-            <div className="flex justify-between mt-4">
+            <div className="flex justify-center gap-4 mt-6">
               <button
                 onClick={handleApprove}
-                className="bg-green-500 text-white p-2 rounded"
+                className="bg-green-600 cursor-pointer hover:bg-green-700 text-white py-2 px-6 rounded-lg shadow-md transition-all"
               >
                 Approve
               </button>
               <button
                 onClick={handleRefuse}
-                className="bg-red-500 text-white p-2 rounded"
+                className="bg-red-600 cursor-pointer hover:bg-red-700 text-white py-2 px-6 rounded-lg shadow-md transition-all"
               >
                 Refuse
               </button>
             </div>
 
-            <button onClick={closeModal} className="mt-4 bg-red-500 text-white p-2 rounded">
-              Close
+            <button
+              onClick={closeModal}
+              className="absolute top-4 cursor-pointer right-4 bg-gray-300 hover:bg-gray-400 text-gray-800 p-2 rounded-full transition-all"
+            >
+              ✕
             </button>
           </div>
         </div>

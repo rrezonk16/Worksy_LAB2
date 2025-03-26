@@ -8,7 +8,7 @@ const AdminInternalPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [permissions, setPermissions] = useState([]);
   const location = useLocation();
-  const navigate = useNavigate(); // Use navigate instead of href
+  const navigate = useNavigate();
 
   useEffect(() => {
     const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
@@ -18,6 +18,11 @@ const AdminInternalPanel = () => {
   const getActiveTab = () => {
     const params = new URLSearchParams(location.search);
     return params.get("active-tab") || "users";
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
 
   const renderComponent = () => {
@@ -81,7 +86,10 @@ const AdminInternalPanel = () => {
             </li>
           )}
           <li>
-            <button className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-red-300 bg-red-200">
+            <button 
+              onClick={handleLogout} 
+              className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-red-300 bg-red-200"
+            >
               Log Out
             </button>
           </li>
