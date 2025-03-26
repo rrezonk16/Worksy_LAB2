@@ -3,6 +3,8 @@ import Main from "./Components/Main/Main";
 import Error404 from "./Components/ErrorPages/Error404";
 import Register from "./Components/Auth/Register";
 import Login from "./Components/Auth/Login";
+import Welcome from "./Components/Auth/welcome";
+
 ;
 
 

@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const IndividualSeekerForm = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -12,7 +15,7 @@ const IndividualSeekerForm = () => {
     email: "",
     password: "",
     password_confirmation: "",
-    role_id: 1, 
+    role_id: 1,
     acceptedTerms: false,
   });
 
@@ -35,11 +38,19 @@ const IndividualSeekerForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
-      const response = await axios.post("http://localhost:8000/api/register", formData);
-      if (response.data.success) {
-        console.log("User registered successfully:", response.data);
+      
+
+      const response = await axios.post("http://localhost:8000/api/register/user", formData);
+
+      if (response.data.success || response.status === 200) {
+        navigate("/welcome", {
+          state: {
+            name: formData.name,
+            email: formData.email,
+          },
+        });
       }
     } catch (error) {
       console.error("Error registering:", error);
@@ -54,7 +65,7 @@ const IndividualSeekerForm = () => {
     <div className="flex justify-center items-center min-h-screen ">
       <div className="form-container bg-white p-8 rounded-lg shadow-lg w-full sm:w-96">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {step === 1 && (
             <>
@@ -195,7 +206,7 @@ const IndividualSeekerForm = () => {
               <button
                 type="submit"
                 className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
-                disabled={!formData.acceptedTerms} // Disable if terms aren't accepted
+                disabled={!formData.acceptedTerms}
               >
                 Register
               </button>
