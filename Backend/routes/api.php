@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\CompanyUserLoginController;
 use App\Http\Controllers\CompanyVerificationController;
+use App\Http\Controllers\UserDetailController;
 
 //Open routes i vendos ketu
 Route::post('register/user', [UserController::class, 'register']);
@@ -34,11 +35,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:EDIT_USERS');
     Route::delete('users/{id}', [UserController::class, 'softDeleteUser'])->middleware('permission:DELETE_USERS');
     Route::get('/company-verification/{companyId}', [CompanyVerificationController::class, 'getCompanyVerification']);
-    Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:ACTIVATE_COMPANY_VERIFICATION');
+    Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:APPROVE_APPLICATION');
     Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
     Route::get('/companies', [CompanyVerificationController::class, 'getCompanies']);
     Route::post('/apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
     Route::get('/get-my-permissions', [UserController::class, 'getMyPermissions']);
+    Route::post('/user/profile-image-update', [UserDetailController::class, 'updateProfileImage']);
+    Route::get('/users/{id}/details', [UserController::class, 'getUserWithDetailsById'])->middleware('permission:READ_USERS');
+
 });
 
 

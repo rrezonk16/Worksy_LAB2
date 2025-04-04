@@ -15,7 +15,6 @@ use App\Models\UserDetail;
 class UserController extends Controller
 {
 
-    //register job seeker
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -32,7 +31,7 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $roleId = 1;
+        $roleId = 3; // Job Seeker
 
         $user = User::create([
             'name' => $request->name,
@@ -40,7 +39,7 @@ class UserController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone_number' => $request->phone_number,
-            'role_id' => $roleId, // Assign role_id = 1
+            'role_id' => $roleId, 
         ]);
 
         $userDetail = UserDetail::create([
@@ -165,6 +164,21 @@ class UserController extends Controller
         ], 200);
     }
 
+    public function getUserWithDetailsById($id)
+{
+    $user = User::with(['role', 'details'])->find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found.'], 404);
+    }
+
+    return response()->json([
+        'message' => 'User and details retrieved successfully!',
+        'user' => $user
+    ], 200);
+}
+
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
@@ -231,7 +245,11 @@ class UserController extends Controller
     
     public function updateMyUserData(Request $request)
 {
-    $user = Auth::user(); 
+    $user = User::find(Auth::id()); 
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
 
     $validator = Validator::make($request->all(), [
         'name' => 'nullable|string|max:255',

@@ -7,6 +7,8 @@ import Main from "./Components/Main/Main";
 import CompanyVerificationForm from "./Components/Auth/CompanyVerificationForm";
 import CompanyPanelLogin from "./Components/Auth/CompanyPanelLogin";
 import isLoggedIn from "./Components/Functions/isLoggedIn";
+import Unverified from "./Components/Admin/Company/Unverified";
+import CompanyAdminlPanel from "./Components/Admin/Company/CompanyAdminlPanel";
 
 const routes = [
   {
@@ -30,8 +32,16 @@ const routes = [
     element: <CompanyVerificationForm/>
   },
   {
+    path: "/company/uploaded-documents",
+    element: <Unverified/>
+  },
+  {
     path: "/Admin/Internal/Panel",
     element: isLoggedIn() ? <AdminInternalPanel/> : <Navigate to="/login"/>
+  },
+  {
+    path: "/company/dashboard",
+    element:<CompanyAdminlPanel/> 
   },
   {
     path: "/*",

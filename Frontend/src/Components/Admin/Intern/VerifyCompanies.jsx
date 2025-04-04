@@ -7,7 +7,6 @@ const VerifyCompanies = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch companies data
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
@@ -20,6 +19,7 @@ const VerifyCompanies = () => {
             },
           }
         );
+        console.log("Companies:", response.data);        
         setCompanies(response.data);
       } catch (error) {
         console.error("Error fetching companies:", error);
@@ -31,7 +31,7 @@ const VerifyCompanies = () => {
 
   const handleActivateClick = (company) => {
     setIsModalOpen(true);
-    setSelectedCompany(company); // Use the whole company object
+    setSelectedCompany(company);
   };
 
   const closeModal = () => {
@@ -108,6 +108,18 @@ const VerifyCompanies = () => {
       filter: true,
       sortable: true,
     },
+    {
+      headerName: "Applied for verification",
+      field: "created_at",
+      filter: true,
+      sortable: true,
+    },
+    {
+      headerName: "Decision Made",
+      field: "updated_at",
+      filter: true,
+      sortable: true,
+    },
     { headerName: "Status", field: "status", filter: true, sortable: true },
     {
       headerName: "Actions",
@@ -129,8 +141,8 @@ const VerifyCompanies = () => {
   ];
 
   return (
-    <div className="mt-12">
-      <h1>Verify Companies</h1>
+    <div className="mt-14">
+      <h1 className="mb-4">Verify Companies</h1>
 
       <div
         className="ag-theme-alpine"
@@ -147,14 +159,13 @@ const VerifyCompanies = () => {
             if (params.data.status === "approved") {
               return { backgroundColor: "#d4edda" }; 
             } else if (params.data.status === "rejected") {
-              return { backgroundColor: "#f8d7da" }; // Light red for rejected
+              return { backgroundColor: "#f8d7da" }; 
             }
-            return {}; // Default style
+            return {}; 
           }}
         />
       </div>
 
-      {/* Modal */}
       {isModalOpen && selectedCompany && (
         <div className="fixed inset-0 flex justify-center items-center p-4">
           <div className="bg-white p-6 rounded-2xl shadow-xl max-w-lg w-full relative">

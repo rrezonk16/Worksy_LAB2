@@ -38,7 +38,7 @@ const IndividualSeekerForm = () => {
     e.preventDefault();
     
     try {
-      const response = await axios.post("http://localhost:8000/api/register", formData);
+      const response = await axios.post("http://localhost:8000/api/register/user", formData);
       if (response.data.success) {
         console.log("User registered successfully:", response.data);
       }

@@ -56,28 +56,30 @@ class CompanyVerificationController extends Controller
             'verification' => $verification
         ], 200);
     }
-
     public function getCompanyVerification($companyId)
     {
         $verification = CompanyVerification::where('company_id', $companyId)->first();
-
+    
         if (!$verification) {
             return response()->json(['message' => 'Verification record not found.'], 404);
         }
-
+    
         return response()->json([
+            'verification_id' => $verification->id,
             'company_id' => $verification->company_id,
             'status' => $verification->status,
             'company_certificate_url' => asset(str_replace('public/', 'storage/', $verification->company_certificate_url)),
             'owner_id_front' => asset(str_replace('public/', 'storage/', $verification->owner_id_front)),
             'owner_id_back' => asset(str_replace('public/', 'storage/', $verification->owner_id_back)),
+            'created_at' => $verification->created_at->toDateTimeString(),  // Ensure timestamps are included
+            'updated_at' => $verification->updated_at->toDateTimeString(),
         ], 200);
     }
-
+    
     public function getCompanies()
     {
         $companies = CompanyVerification::with('company')->get();
-
+    
         $result = $companies->map(function ($verification) {
             return [
                 'verification_id' => $verification->id,
@@ -90,12 +92,14 @@ class CompanyVerificationController extends Controller
                 'company_certificate_url' => asset(str_replace('public/', 'storage/', $verification->company_certificate_url)),
                 'owner_id_front' => asset(str_replace('public/', 'storage/', $verification->owner_id_front)),
                 'owner_id_back' => asset(str_replace('public/', 'storage/', $verification->owner_id_back)),
+                'created_at' => $verification->created_at ? $verification->created_at->toDateTimeString() : null,
+                'updated_at' => $verification->updated_at ? $verification->updated_at->toDateTimeString() : null,
             ];
         });
-
+    
         return response()->json($result, 200);
     }
-
+    
 
     public function activateVerification($companyId)
     {
