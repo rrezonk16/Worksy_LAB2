@@ -9,6 +9,8 @@ import CompanyPanelLogin from "./Components/Auth/CompanyPanelLogin";
 import isLoggedIn from "./Components/Functions/isLoggedIn";
 import Unverified from "./Components/Admin/Company/Unverified";
 import CompanyAdminlPanel from "./Components/Admin/Company/CompanyAdminlPanel";
+import Welcome from "./Components/Auth/welcome";
+
 
 const routes = [
   {

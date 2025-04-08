@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import axios from "axios";
 import IconLoading from "../Loaders/IconLoading";
+import { useNavigate } from "react-router-dom";
 
 const IndividualSeekerForm = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     surname: "",
@@ -13,7 +16,7 @@ const IndividualSeekerForm = () => {
     email: "",
     password: "",
     password_confirmation: "",
-    role_id: 1, 
+    role_id: 1,
     acceptedTerms: false,
   });
 
@@ -36,11 +39,19 @@ const IndividualSeekerForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
+      
+
       const response = await axios.post("http://localhost:8000/api/register/user", formData);
-      if (response.data.success) {
-        console.log("User registered successfully:", response.data);
+
+      if (response.data.success || response.status === 200) {
+        navigate("/welcome", {
+          state: {
+            name: formData.name,
+            email: formData.email,
+          },
+        });
       }
     } catch (error) {
       console.error("Error registering:", error);
@@ -195,7 +206,7 @@ const IndividualSeekerForm = () => {
               <button
                 type="submit"
                 className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
-                disabled={!formData.acceptedTerms} // Disable if terms aren't accepted
+                disabled={!formData.acceptedTerms}
               >
                 Register
               </button>
