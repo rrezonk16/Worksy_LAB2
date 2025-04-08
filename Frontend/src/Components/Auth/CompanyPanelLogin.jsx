@@ -32,16 +32,16 @@ const CompanyPanelLogin = () => {
       console.log(response.data.user.company);
       
       localStorage.setItem("company_user_token", token);
-    localStorage.setItem("company_information", JSON.stringify(response.data.user.company));
+      localStorage.setItem("company_name", response.data.user.company.name);
 
-      // if (company_verification_status === "pending") {
-      //   navigate("/company/verify");
-      // } else if (company_verification_status === "approved") {
-      //   navigate("/company/dashboard");
-      // }
-      // else if (company_verification_status === "uploaded") {
-      //   navigate("/company/uploaded-documents");
-      // }
+      if (company_verification_status === "pending") {
+        navigate("/company/verify");
+      } else if (company_verification_status === "approved") {
+        navigate("/company/dashboard");
+      }
+      else if (company_verification_status === "uploaded") {
+        navigate("/company/uploaded-documents");
+      }
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Please try again.");
     } finally {

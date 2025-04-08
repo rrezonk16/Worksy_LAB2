@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate for React Router v6
-import gsap from "gsap";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Login_background from "../../Assets/work.jpg";
 
 const Login = () => {
@@ -9,8 +9,7 @@ const Login = () => {
     password: "",
   });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const navigate = useNavigate(); // Use useNavigate for navigation
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,55 +23,25 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API login request
     try {
-      const response = await fetch("http://localhost:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await axios.post("http://localhost:8000/api/login", formData);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // Save user data to localStorage
+      if (response.status === 200) {
+        const data = response.data;
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("permissions", JSON.stringify(data.permissions));
-
-        // Trigger success animation and redirect after animation
-        setSuccess(true);
-        gsap.fromTo(
-          ".green-tick", // Animate the green tick first
-          { opacity: 0, scale: 0.5 },
-          { opacity: 1, scale: 1, duration: 1.5, onComplete: triggerGreenFlash }
-        );
-      } else {
-        alert(data.message || "Login failed!");
+        navigate("/");
       }
     } catch (error) {
-      alert("An error occurred!");
-      console.log(error);
-      
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("An error occurred!");
+      }
     } finally {
       setLoading(false);
     }
-  };
-
-  const triggerGreenFlash = () => {
-    // Animate the green flash effect after the checkmark animation
-    gsap.to(".green-flash", {
-      opacity: 1,
-      duration: 0.5,
-      onComplete: () => redirectToMainPage(),
-    });
-  };
-
-  const redirectToMainPage = () => {
-    // Redirect to main page after the flash
-    navigate("/main");
   };
 
   return (
@@ -134,26 +103,6 @@ const Login = () => {
               <a href="/register">Don't have an account?</a>
             </div>
           </form>
-
-          {/* Green flash effect */}
-          {success && (
-            <div className="green-flash absolute top-0 left-0 right-0 bottom-0 bg-blue-300 opacity-0">
-              <div className="green-tick absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center">
-                <svg
-                  className="w-20 h-20 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M16.707 4.293a1 1 0 00-1.414 0L8 11.586 4.707 8.293a1 1 0 10-1.414 1.414l4 4a1 1 0 001.414 0l8-8a1 1 0 000-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

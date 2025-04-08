@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo_icon from "../../../assets/logo_icon.png";
 
-
 const CompanyAdminPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [permissions, setPermissions] = useState([]);
@@ -10,7 +9,8 @@ const CompanyAdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
+    const storedPermissions =
+      JSON.parse(localStorage.getItem("permissions")) || [];
     setPermissions(storedPermissions);
   }, []);
 
@@ -27,9 +27,17 @@ const CompanyAdminPanel = () => {
   const renderComponent = () => {
     switch (getActiveTab()) {
       case "users":
-        return permissions.includes("READ_USERS") ? <div className="mt-13">OK</div> : <div>Access Denied</div>;
+        return permissions.includes("READ_USERS") ? (
+          <div className="mt-13">OK</div>
+        ) : (
+          <div>Access Denied</div>
+        );
       case "verify-companies":
-        return permissions.includes("EDIT_USERS") ? <div>OK</div> : <div>Access Denied</div>;
+        return permissions.includes("EDIT_USERS") ? (
+          <div>OK</div>
+        ) : (
+          <div>Access Denied</div>
+        );
       default:
         return <div>Dashboard</div>;
     }
@@ -51,20 +59,20 @@ const CompanyAdminPanel = () => {
             ></path>
           </svg>
         </button>
-        <div className="flex items-left">
-          <img src={logo_icon} className="h-8 mr-3" alt="Worksy" />
-          <span className="text-xl font-semibold">{JSON.parse(localStorage.getItem("company_information"))?.name} Panel</span>
-          </div>
+        <div className="flex items-center space-x-3">
+          <img src={logo_icon} className="h-8" alt="Worksy Logo" />
+          <span className="text-xl font-semibold">
+            {localStorage.getItem("company_name") || "Company"} Panel
+          </span>
+        </div>
       </nav>
 
-      {/* Sidebar */}
       <aside
         className={`fixed top-0 left-0 z-40 w-64 h-screen bg-gray-100 p-5 transition-transform transform ${
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } sm:translate-x-0 shadow-md`}
       >
         <ul className="mt-16">
-   
           {permissions.includes("READ_USERS") && (
             <li>
               <button
@@ -81,13 +89,13 @@ const CompanyAdminPanel = () => {
                 onClick={() => navigate("?active-tab=verify-companies")}
                 className="w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer flex justify-between"
               >
-                Job Listings  
+                Job Listings
               </button>
             </li>
           )}
           <li>
-            <button 
-              onClick={handleLogout} 
+            <button
+              onClick={handleLogout}
               className="block w-full text-left p-3 cursor-pointer rounded-md text-white hover:bg-red-800 bg-red-500"
             >
               Log Out
