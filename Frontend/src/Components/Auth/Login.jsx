@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Login_background from "../../Assets/work.jpg";
 
 const Login = () => {
@@ -6,6 +8,8 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -15,9 +19,29 @@ const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", formData);
+    setLoading(true);
+
+    try {
+      const response = await axios.post("http://localhost:8000/api/login", formData);
+
+      if (response.status === 200) {
+        const data = response.data;
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("permissions", JSON.stringify(data.permissions));
+        navigate("/");
+      }
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("An error occurred!");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,7 +59,9 @@ const Login = () => {
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Login</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm text-gray-700">Email</label>
+              <label htmlFor="email" className="block text-sm text-gray-700">
+                Email
+              </label>
               <input
                 type="email"
                 id="email"
@@ -48,7 +74,9 @@ const Login = () => {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm text-gray-700">Password</label>
+              <label htmlFor="password" className="block text-sm text-gray-700">
+                Password
+              </label>
               <input
                 type="password"
                 id="password"
@@ -62,15 +90,17 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+              className={`w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition ${
+                loading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={loading}
             >
-              Login
+              {loading ? "Logging In..." : "Login"}
             </button>
 
             <div className="mt-4 text-sm text-blue-500 hover:text-blue-700 justify-between flex">
               <a href="/forgot-password">Forgot Password?</a>
-              <a href="/register">Don't have and account?</a>
-
+              <a href="/register">Don't have an account?</a>
             </div>
           </form>
         </div>

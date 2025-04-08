@@ -1,4 +1,5 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
@@ -9,19 +10,40 @@ class RolePermissionSeeder extends Seeder
 {
     public function run()
     {
-        // Assuming you already have a role created (e.g., Admin)
+        // Fetch roles
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
+        $jobSeekerRole = Role::firstOrCreate(['name' => 'job_seeker']);
+        $employerRole = Role::firstOrCreate(['name' => 'individual_employer']);
 
-        // Create permissions
-        $readUsers = Permission::firstOrCreate(['name' => 'READ_USERS']);
-        $editUsers = Permission::firstOrCreate(['name' => 'EDIT_USERS']);
-        $addUsers = Permission::firstOrCreate(['name' => 'ADD_USERS']);
-        $updateUsers = Permission::firstOrCreate(['name' => 'UPDATE_USERS']);
+        // Fetch permissions
+        $permissions = Permission::pluck('id', 'name'); // Fetch all permissions
 
-        // Assign permissions to the admin role
-        $adminRole->givePermissionTo($readUsers);
-        $adminRole->givePermissionTo($editUsers);
-        $adminRole->givePermissionTo($addUsers);
-        $adminRole->givePermissionTo($updateUsers);
+        // Assign permissions to admin (full access)
+        $adminRole->syncPermissions($permissions->values());
+
+        // Assign job seeker permissions
+        $jobSeekerPermissions = [
+            'APPLY_JOB',
+            'VIEW_APPLICATIONS',
+            'SEND_MESSAGE',
+            'READ_MESSAGES',
+            'WRITE_REVIEW',
+        ];
+        $jobSeekerRole->syncPermissions(array_values($permissions->only($jobSeekerPermissions)->toArray()));
+
+        // Assign employer permissions
+        $employerPermissions = [
+            'POST_JOB',
+            'EDIT_JOB',
+            'DELETE_JOB',
+            'VIEW_APPLICATIONS',
+            'SHORTLIST_APPLICATION',
+            'APPROVE_APPLICATION',
+            'SEND_MESSAGE',
+            'READ_MESSAGES',
+        ];
+        $employerRole->syncPermissions(array_values($permissions->only($employerPermissions)->toArray()));
+
+        echo "Roles and permissions assigned successfully!\n";
     }
 }

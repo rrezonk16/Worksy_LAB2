@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import axios from "axios";
+import IconLoading from "../Loaders/IconLoading";
 
 const IndividualSeekerForm = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ const IndividualSeekerForm = () => {
     e.preventDefault();
     
     try {
-      const response = await axios.post("http://localhost:8000/api/register", formData);
+      const response = await axios.post("http://localhost:8000/api/register/user", formData);
       if (response.data.success) {
         console.log("User registered successfully:", response.data);
       }
@@ -54,7 +55,6 @@ const IndividualSeekerForm = () => {
     <div className="flex justify-center items-center min-h-screen ">
       <div className="form-container bg-white p-8 rounded-lg shadow-lg w-full sm:w-96">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
-        
         <form onSubmit={handleSubmit} className="space-y-4">
           {step === 1 && (
             <>

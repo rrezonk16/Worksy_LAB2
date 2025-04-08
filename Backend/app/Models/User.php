@@ -25,13 +25,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // Relationship with UserDetails
     public function details()
     {
         return $this->hasOne(UserDetail::class, 'user_id');
     }
 
-    // Relationship with Role
     public function role()
     {
         return $this->belongsTo(Role::class);

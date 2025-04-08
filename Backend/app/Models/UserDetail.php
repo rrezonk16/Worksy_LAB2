@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class UserDetail extends Model
 {
@@ -18,7 +19,6 @@ class UserDetail extends Model
         'resume_link_to_file',
         'social_links',
         'gender',
-
     ];
 
     protected $casts = [
@@ -29,5 +29,11 @@ class UserDetail extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Accessor to get the full URL of the profile image
+    public function getProfileImageAttribute($value)
+    {
+        return $value ? url('storage/profile_images/' . $value) : null;
     }
 }
