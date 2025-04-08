@@ -44,8 +44,10 @@ const IndividualSeekerForm = () => {
       
 
       const response = await axios.post("http://localhost:8000/api/register/user", formData);
-
-      if (response.data.success || response.status === 200) {
+      console.log(response);
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+      if (response.status === 201) {
         navigate("/welcome", {
           state: {
             name: formData.name,

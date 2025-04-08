@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import logo_full from '../../assets/logo_full.png';
+import Footer from '../Navigation/Footer';
 const Main = () => {
   const navigate = useNavigate();
 
@@ -9,8 +10,7 @@ const Main = () => {
       {/* Header */}
       <header className="flex justify-between items-center p-6">
         <div className="flex items-center space-x-2">
-          <img src="/public/Favicon-32x32.png" alt="Worksy Logo" className="w-10 h-10" />
-          <h1 className="text-2xl font-bold text-gray-800">Work<span className="text-green-500">sy</span></h1>
+          <img src={logo_full} alt="Worksy Logo" className=" h-10" />
         </div>
         <div className="space-x-4">
           <button className="text-gray-800 font-medium">About Us</button>
@@ -18,7 +18,6 @@ const Main = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
       <section className="flex flex-col lg:flex-row items-center justify-between py-16">
 
         <div className="w-full lg:w-1/2 px-8 lg:px-16">
@@ -68,12 +67,7 @@ const Main = () => {
         <button onClick={() => navigate('/register')} className="bg-green-500 text-white px-6 py-2 rounded-full">Join now</button>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-green-400 py-8 text-center text-white font-semibold">
-        <img src="/logo.png" alt="Worksy Logo" className="mx-auto w-12 mb-2" />
-        <h2 className="text-xl">Worksy</h2>
-        <p className="italic">Footer</p>
-      </footer>
+      <Footer />
     </div>
   );
 };
