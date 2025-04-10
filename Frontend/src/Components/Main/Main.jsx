@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo_full from '../../assets/logo_full.png';
 import Footer from '../Navigation/Footer';
+import SingleJobPage from '../Jobs/SingleJobPage';
+import CreateJobApplication from '../Admin/Company/CreateJobApplication';
 const Main = () => {
   const navigate = useNavigate();
 

@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\CompanyUserLoginController;
 use App\Http\Controllers\CompanyVerificationController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserDetailController;
 
 //Open routes i vendos ketu
@@ -42,6 +43,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/get-my-permissions', [UserController::class, 'getMyPermissions']);
     Route::post('/user/profile-image-update', [UserDetailController::class, 'updateProfileImage']);
     Route::get('/users/{id}/details', [UserController::class, 'getUserWithDetailsById'])->middleware('permission:READ_USERS');
+    Route::post('/jobs', [JobController::class, 'store']);
+    Route::get('/jobs', [JobController::class, 'index']);
 
 });
 
