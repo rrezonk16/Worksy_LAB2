@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 import axios from "axios";
-import UserDetailsModal from "./UserDetailsModal"; // Import the modal component
+import UserDetailsModal from "./UserDetailsModal"; 
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 

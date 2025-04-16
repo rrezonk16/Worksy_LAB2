@@ -29,7 +29,7 @@ const CompanyPanelLogin = () => {
       );
 
       const { token, company_verification_status } = response.data;
-      console.log(response.data.user.company);
+      console.log(response);
       
       localStorage.setItem("company_user_token", token);
       localStorage.setItem("company_name", response.data.user.company.name);

@@ -1,24 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo_full from '../../assets/logo_full.png';
 import Footer from '../Navigation/Footer';
-import SingleJobPage from '../Jobs/SingleJobPage';
-import CreateJobApplication from '../Admin/Company/CreateJobApplication';
+import Navbar from '../Navigation/Navbar';
 const Main = () => {
   const navigate = useNavigate();
 
   return (
     <div className="font-sans bg-gradient-to-b from-[#d7f0dc] to-white min-h-screen">
       {/* Header */}
-      <header className="flex justify-between items-center p-6">
-        <div className="flex items-center space-x-2">
-          <img src={logo_full} alt="Worksy Logo" className=" h-10" />
-        </div>
-        <div className="space-x-4">
-          <button className="text-gray-800 font-medium">About Us</button>
-          <button onClick={() => navigate('/register')} className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white">Join now</button>
-        </div>
-      </header>
+<Navbar/>
 
       <section className="flex flex-col lg:flex-row items-center justify-between py-16">
 

@@ -10,6 +10,9 @@ import isLoggedIn from "./Components/Functions/isLoggedIn";
 import Unverified from "./Components/Admin/Company/Unverified";
 import CompanyAdminlPanel from "./Components/Admin/Company/CompanyAdminlPanel";
 import Welcome from "./Components/Auth/welcome";
+import JobListings from "./Components/Main/JobListings";
+import JobListingsById from "./Components/Main/JobListingsById";
+import MyApplications from "./Components/Jobs/MyApplications";
 
 
 const routes = [
@@ -44,6 +47,18 @@ const routes = [
   {
     path: "/company/dashboard",
     element:<CompanyAdminlPanel/> 
+  },
+  {
+    path: "/job-listings",
+    element:<JobListings/> 
+  },
+  {
+    path: "/job-listings/:id",
+    element:<JobListingsById/>
+  },
+  {
+    path: "/my-applications",
+    element:<MyApplications/>
   },
   {
     path: "/*",

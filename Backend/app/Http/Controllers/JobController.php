@@ -12,7 +12,32 @@ use Illuminate\Support\Str;
 
 class JobController extends Controller
 {
- 
+    public function publicIndex()
+    {
+        $jobs = Job::with([
+            'questions.options',
+            'company'
+        ])
+        ->latest()
+        ->get();
+    
+        return response()->json([
+            'jobs' => $jobs
+        ]);
+    }
+
+    public function publicShow($id)
+    {
+        $job = Job::with([
+            'questions.options',
+            'company'
+        ])
+        ->findOrFail($id);
+
+        return response()->json([
+            'job' => $job
+        ]);
+    }
     
 public function index(Request $request)
 {
@@ -45,7 +70,7 @@ public function index(Request $request)
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'questions' => 'nullable|string', // received as JSON string
+            'questions' => 'nullable|string',
             'attachment' => 'nullable|file|max:20480',
         ]);
     

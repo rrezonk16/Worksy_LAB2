@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import logo_icon from "../../../assets/logo_icon.png";
+import CreateJobApplication from "./CreateJobApplication";
+import CompanyJobsList from "./CompanyJobsList";
 
 const CompanyAdminPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -26,15 +28,22 @@ const CompanyAdminPanel = () => {
 
   const renderComponent = () => {
     switch (getActiveTab()) {
-      case "users":
+    
+      case "make-job-listing":
         return permissions.includes("READ_USERS") ? (
-          <div className="mt-13">OK</div>
+          <div>
+           
+            <CreateJobApplication />
+          </div>
         ) : (
           <div>Access Denied</div>
         );
-      case "verify-companies":
-        return permissions.includes("EDIT_USERS") ? (
-          <div>OK</div>
+        case "jobs-list":
+        return permissions.includes("READ_USERS") ? (
+          <div>
+           
+            <CompanyJobsList />
+          </div>
         ) : (
           <div>Access Denied</div>
         );
@@ -73,7 +82,6 @@ const CompanyAdminPanel = () => {
         } sm:translate-x-0 shadow-md`}
       >
         <ul className="mt-16">
-          {permissions.includes("READ_USERS") && (
             <li>
               <button
                 onClick={() => navigate("?active-tab=users")}
@@ -82,17 +90,22 @@ const CompanyAdminPanel = () => {
                 Company Users
               </button>
             </li>
-          )}
-          {permissions.includes("EDIT_USERS") && (
             <li>
               <button
-                onClick={() => navigate("?active-tab=verify-companies")}
+                onClick={() => navigate("?active-tab=jobs-list")}
+                className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+              >
+                All Jobs
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() => navigate("?active-tab=make-job-listing")}
                 className="w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer flex justify-between"
               >
                 Job Listings
               </button>
             </li>
-          )}
           <li>
             <button
               onClick={handleLogout}

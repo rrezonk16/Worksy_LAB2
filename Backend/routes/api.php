@@ -18,6 +18,7 @@ use App\Http\Controllers\Auth\UserController;
 use App\Http\Controllers\Company\CompanyController;
 use App\Http\Controllers\CompanyUserLoginController;
 use App\Http\Controllers\CompanyVerificationController;
+use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\UserDetailController;
 
@@ -26,7 +27,8 @@ Route::post('register/user', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
 Route::post('register/company', [CompanyController::class, 'register']);
 Route::post('company-user/login', [CompanyUserLoginController::class, 'login']);
-
+Route::get('/public/jobs', [JobController::class, 'publicIndex']);
+Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
 //Protected routes i vendos ketu
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('user/details', [UserController::class, 'updateUserDetails']);
@@ -45,8 +47,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/{id}/details', [UserController::class, 'getUserWithDetailsById'])->middleware('permission:READ_USERS');
     Route::post('/jobs', [JobController::class, 'store']);
     Route::get('/jobs', [JobController::class, 'index']);
-
+    Route::post('/job-apply', [JobApplicationController::class, 'apply']);
+    Route::get('/job-applications/{jobId}', [JobApplicationController::class, 'getApplicationsForJob']);
 });
+Route::middleware('auth:sanctum')->get('/my-applications', [\App\Http\Controllers\JobApplicationController::class, 'myApplications']);
 
 
 
