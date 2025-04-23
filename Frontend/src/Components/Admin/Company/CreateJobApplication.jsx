@@ -11,7 +11,14 @@ const CreateJobApplication = () => {
   const [inputType, setInputType] = useState("yesno");
   const [isRequired, setIsRequired] = useState(false);
   const [options, setOptions] = useState("");
-
+  const [wage, setWage] = useState("");
+  const [location, setLocation] = useState("");
+  const [employmentType, setEmploymentType] = useState("Full-time");
+  const [experienceLevel, setExperienceLevel] = useState("Entry-level");
+  const [hashtags, setHashtags] = useState("");
+  const [benefits, setBenefits] = useState("");
+  const [deadline, setDeadline] = useState("");
+  
   const premadeQuestions = [
     { question_text: "What is your first name?", input_type: "text" },
     { question_text: "What is your surname?", input_type: "text" },
@@ -47,7 +54,15 @@ const CreateJobApplication = () => {
       title,
       description,
       questions: JSON.stringify(questions),
+      wage,
+      location,
+      employment_type: employmentType,
+      experience_level: experienceLevel,
+      hashtags: hashtags.split(",").map(tag => tag.trim()),
+      benefits: benefits.split(",").map(b => b.trim()),
+      deadline,
     };
+    
     console.log("Job Data:", jobData);
 
     try {
@@ -106,6 +121,66 @@ const CreateJobApplication = () => {
             onChange={(e) => setDescription(e.target.value)}
             className="bg-gray-50  border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
           />
+          <input
+  type="text"
+  placeholder="Wage (e.g. $1500/month)"
+  value={wage}
+  onChange={(e) => setWage(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+/>
+
+<input
+  type="text"
+  placeholder="Location"
+  value={location}
+  onChange={(e) => setLocation(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+/>
+
+<select
+  value={employmentType}
+  onChange={(e) => setEmploymentType(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+>
+  <option value="Full-time">Full-time</option>
+  <option value="Part-time">Part-time</option>
+  <option value="Contract">Contract</option>
+  <option value="Internship">Internship</option>
+</select>
+
+<select
+  value={experienceLevel}
+  onChange={(e) => setExperienceLevel(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+>
+  <option value="Entry-level">Entry-level</option>
+  <option value="Mid-level">Mid-level</option>
+  <option value="Senior-level">Senior-level</option>
+</select>
+
+<input
+  type="text"
+  placeholder="Hashtags (comma separated)"
+  value={hashtags}
+  onChange={(e) => setHashtags(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+/>
+
+<input
+  type="text"
+  placeholder="Benefits (comma separated)"
+  value={benefits}
+  onChange={(e) => setBenefits(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+/>
+
+<input
+  type="date"
+  value={deadline}
+  onChange={(e) => setDeadline(e.target.value)}
+  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+/>
+
         </div>
 
         <div>

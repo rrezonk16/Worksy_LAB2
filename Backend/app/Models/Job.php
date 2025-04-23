@@ -11,8 +11,9 @@ class Job extends Model
 
     public function company()
     {
-        return $this->belongsTo(User::class, 'company_id');
+        return $this->belongsTo(Company::class, 'company_id');
     }
+    
 
     public function questions()
     {
@@ -23,4 +24,9 @@ class Job extends Model
     {
         return $this->hasMany(JobApplication::class);
     }
+    public function details()
+{
+    return $this->hasOne(JobDetail::class);
+}
+
 }

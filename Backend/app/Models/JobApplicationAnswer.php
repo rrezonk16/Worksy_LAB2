@@ -13,9 +13,11 @@ class JobApplicationAnswer extends Model
     {
         return $this->belongsTo(JobApplication::class);
     }
+// In JobAnswer.php (Model)
+public function question()
+{
+    return $this->belongsTo(JobQuestion::class, 'job_question_id');
+}
 
-    public function question()
-    {
-        return $this->belongsTo(JobQuestion::class);
-    }
+    
 }

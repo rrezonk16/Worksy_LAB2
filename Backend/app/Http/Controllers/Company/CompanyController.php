@@ -9,9 +9,35 @@ use App\Models\CompanyVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 class CompanyController extends Controller
 {
+
+    public function uploadLogo(Request $request)
+{
+    $request->validate([
+        'logo' => 'required|image|mimes:jpeg,jpg,png|max:2048', // max 2MB
+    ]);
+
+    $user = Auth::user();
+    $company = $user->company;
+
+    if ($request->hasFile('logo')) {
+        if ($company->logo_url && Storage::exists(str_replace('/storage/', 'public/', $company->logo_url))) {
+            Storage::delete(str_replace('/storage/', 'public/', $company->logo_url));
+        }
+
+        $path = $request->file('logo')->store('public/logos');
+        $company->logo_url = Storage::url($path);
+        $company->save();
+    }
+
+    return response()->json([
+        'message' => 'Logo uploaded successfully.',
+        'logo_url' => $company->logo_url,
+    ]);
+}
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [

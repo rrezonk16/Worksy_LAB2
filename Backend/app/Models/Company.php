@@ -9,11 +9,13 @@ class Company extends Model {
     use HasFactory;
 
     protected $fillable = [
-        'name', 'nui', 'number_of_employees','email', 'city', 'country', 'address', 'phone_number', 'njesia', 'activities'
+        'name', 'nui', 'number_of_employees', 'email', 'city', 'country',
+        'address', 'phone_number', 'njesite', 'activities', 'logo_url'
     ];
+    
 
     protected $casts = [
-        'njesia' => 'array',
+        'njesite' => 'array',
         'activities' => 'array',
     ];
 

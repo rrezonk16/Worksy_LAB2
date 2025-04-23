@@ -50,7 +50,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/job-apply', [JobApplicationController::class, 'apply']);
     Route::get('/job-applications/{jobId}', [JobApplicationController::class, 'getApplicationsForJob']);
 });
-Route::middleware('auth:sanctum')->get('/my-applications', [\App\Http\Controllers\JobApplicationController::class, 'myApplications']);
+Route::middleware('auth:sanctum')->get('/my-applications', [JobApplicationController::class, 'getUserApplications']);
+Route::middleware('auth:sanctum')->post('/company/logo', [CompanyController::class, 'uploadLogo']);
 
 
 

@@ -18,5 +18,6 @@ class JobQuestion extends Model
     {
         return $this->hasMany(JobQuestionOption::class);
     }
+    
 }
 

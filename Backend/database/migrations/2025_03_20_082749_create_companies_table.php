@@ -11,9 +11,9 @@ return new class extends Migration {
             $table->string('name');
             $table->string('nui'); // Unique number (NUI)
             $table->string('phone_number');
-            $table->string('email')->unique(); // Email field
-            $table->json('njesia')->nullable(); // Array of branches
-            $table->json('activities')->nullable(); // Array of activity IDs
+            $table->string('email')->unique(); ;
+            $table->json('njesite')->nullable();;
+            $table->json('activities')->nullable();
             $table->timestamps();
         });
     }

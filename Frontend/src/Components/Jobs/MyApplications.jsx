@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../Navigation/Navbar';
 import Footer from '../Navigation/Footer';
+import { gsap } from 'gsap';
 
 const MyApplications = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [openJobs, setOpenJobs] = useState({}); // Object to track individual job visibility
 
   useEffect(() => {
     const fetchMyApplications = async () => {
@@ -28,6 +30,24 @@ const MyApplications = () => {
     fetchMyApplications();
   }, []);
 
+  const toggleOpen = (jobId) => {
+    setOpenJobs((prev) => {
+      const newState = { ...prev };
+  
+      if (newState[jobId]) {
+        // Close the job's answers
+        gsap.to(`#answers-${jobId}`, { opacity: 0, height: 0, duration: 0.5 });
+        delete newState[jobId]; // Remove the jobId from openJobs to close it
+      } else {
+        // Open the job's answers
+        gsap.to(`#answers-${jobId}`, { opacity: 1, height: 'auto', duration: 0.5 });
+        newState[jobId] = true; // Add the jobId to openJobs to open it
+      }
+  
+      return newState; // Update state
+    });
+  };
+  
   if (loading) return <div className="text-center mt-10">Loading your applications...</div>;
 
   return (
@@ -41,14 +61,43 @@ const MyApplications = () => {
           <p className="text-gray-600">You haven't applied to any jobs yet.</p>
         ) : (
           <div className="grid gap-6">
-            {jobs.map((job) => (
+            {jobs.map((jobItem) => (
               <div
-                key={job.id}
+                key={jobItem.job.id}
                 className="p-5 border rounded-lg bg-white shadow hover:shadow-lg transition"
               >
-                <h2 className="text-xl font-semibold">{job.title}</h2>
-                <p className="text-gray-700 mb-2">{job.description}</p>
-                <p className="text-sm text-gray-500">Job ID: {job.id}</p>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h2 className="text-xl font-semibold">{jobItem.job.title}</h2>
+                    <p className="text-gray-700 mb-1">{jobItem.job.description}</p>
+                    <p className="text-sm text-gray-500">Company: {jobItem.job.company.name}</p>
+                  </div>
+                  <button
+                    onClick={() => toggleOpen(jobItem.job.id)}
+                    className="text-blue-600 font-semibold hover:underline"
+                  >
+                    {openJobs[jobItem.job.id] ? 'Hide Answers' : 'Show Answers'}
+                  </button>
+                </div>
+
+                <div
+                  id={`answers-${jobItem.job.id}`}
+                  className="mt-4 space-y-4 overflow-hidden"
+                  style={{ opacity: 0, height: 0 }} // Initially hidden
+                >
+                  <div key={jobItem.job.id} className="bg-gray-100 p-4 rounded-md">
+                    <p className="text-sm text-gray-600 mb-2">
+                      Applied at: {jobItem.job.application_date}
+                    </p>
+                    <ul className="list-disc list-inside space-y-1">
+                      {jobItem.answers.map((answer, idx) => (
+                        <li key={idx}>
+                          <strong>{answer.question_text || 'No question text provided'}:</strong> {answer.answer}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

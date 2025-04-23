@@ -48,7 +48,7 @@ const IndividualSeekerForm = () => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       if (response.status === 201) {
-        navigate("/welcome", {
+        navigate("/user-profile", {
           state: {
             name: formData.name,
             email: formData.email,

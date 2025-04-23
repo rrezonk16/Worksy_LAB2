@@ -25,32 +25,19 @@ const CompanyAdminPanel = () => {
     localStorage.clear();
     navigate("/login");
   };
-
   const renderComponent = () => {
     switch (getActiveTab()) {
-    
       case "make-job-listing":
-        return permissions.includes("READ_USERS") ? (
-          <div>
-           
-            <CreateJobApplication />
-          </div>
-        ) : (
-          <div>Access Denied</div>
-        );
-        case "jobs-list":
-        return permissions.includes("READ_USERS") ? (
-          <div>
-           
-            <CompanyJobsList />
-          </div>
-        ) : (
-          <div>Access Denied</div>
-        );
+        return <CreateJobApplication />;
+      case "jobs-list":
+        return <CompanyJobsList />;
+      case "users":
+        return <div>Company Users Page</div>;
       default:
         return <div>Dashboard</div>;
     }
   };
+  
 
   return (
     <div className="flex">
@@ -82,30 +69,30 @@ const CompanyAdminPanel = () => {
         } sm:translate-x-0 shadow-md`}
       >
         <ul className="mt-16">
-            <li>
-              <button
-                onClick={() => navigate("?active-tab=users")}
-                className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
-              >
-                Company Users
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => navigate("?active-tab=jobs-list")}
-                className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
-              >
-                All Jobs
-              </button>
-            </li>
-            <li>
-              <button
-                onClick={() => navigate("?active-tab=make-job-listing")}
-                className="w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer flex justify-between"
-              >
-                Job Listings
-              </button>
-            </li>
+          <li>
+            <button
+              onClick={() => navigate("?active-tab=users")}
+              className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+            >
+              Company Users
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => navigate("?active-tab=jobs-list")}
+              className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+            >
+              All Jobs
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => navigate("?active-tab=make-job-listing")}
+              className="w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer flex justify-between"
+            >
+              Job Listings
+            </button>
+          </li>
           <li>
             <button
               onClick={handleLogout}

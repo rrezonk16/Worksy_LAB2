@@ -13,6 +13,7 @@ import Welcome from "./Components/Auth/welcome";
 import JobListings from "./Components/Main/JobListings";
 import JobListingsById from "./Components/Main/JobListingsById";
 import MyApplications from "./Components/Jobs/MyApplications";
+import ErrorBoundary from "./Components/Functions/ErrorBoundary";
 
 
 const routes = [
@@ -71,12 +72,16 @@ function App() {
   return (
     <Router>
       <div>
+      <ErrorBoundary>
+
         <Routes>
           {routes.map((route, index) => (
             <Route key={index} path={route.path} element={route.element} />
           ))}
-        </Routes>
+        </Routes>      </ErrorBoundary>
+
       </div>
+
     </Router>
   );
 }
