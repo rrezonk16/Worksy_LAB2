@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,6 +30,9 @@ Route::post('register/company', [CompanyController::class, 'register']);
 Route::post('company-user/login', [CompanyUserLoginController::class, 'login']);
 Route::get('/public/jobs', [JobController::class, 'publicIndex']);
 Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
+Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+
 //Protected routes i vendos ketu
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('user/details', [UserController::class, 'updateUserDetails']);
@@ -52,6 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 Route::middleware('auth:sanctum')->get('/my-applications', [JobApplicationController::class, 'getUserApplications']);
 Route::middleware('auth:sanctum')->post('/company/logo', [CompanyController::class, 'uploadLogo']);
+Route::middleware('auth:sanctum')->get('/me', [UserController::class, 'getMyDetails']);
 
 
 

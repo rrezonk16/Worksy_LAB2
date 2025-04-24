@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use App\Models\UserDetail;
+use App\Mail\WelcomeUserMail;
+use Illuminate\Support\Facades\Mail;
 
 class UserController extends Controller
 {
@@ -54,13 +56,17 @@ class UserController extends Controller
         ]);
 
         $token = $user->createToken('Worksy')->plainTextToken;
-
+        Mail::to($user->email)->send(new WelcomeUserMail($user));
+        
         return response()->json([
             'message' => 'User registered successfully!',
             'token' => $token,
             'user' => $user,
             'user_detail' => $userDetail,
         ], 201);
+
+
+
     }
     public function updateUserDetails(Request $request)
     {
@@ -133,7 +139,22 @@ class UserController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
     }
-
+    public function getMyDetails()
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+    
+        $user = User::with(['role', 'details', 'role.permissions'])->find($user->id);
+    
+        return response()->json([
+            'message' => 'User retrieved successfully!',
+            'user' => $user
+        ], 200);
+    }
+    
     public function getMyPermissions()
     {
         $user = Auth::user();

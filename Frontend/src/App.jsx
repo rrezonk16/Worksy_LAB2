@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Error404 from "./Components/ErrorPages/Error404";
 import Register from "./Components/Auth/Register";
 import Login from "./Components/Auth/Login";
@@ -14,74 +19,80 @@ import JobListings from "./Components/Main/JobListings";
 import JobListingsById from "./Components/Main/JobListingsById";
 import MyApplications from "./Components/Jobs/MyApplications";
 import ErrorBoundary from "./Components/Functions/ErrorBoundary";
-
+import Profile from "./Components/Admin/User/Profile";
+import ForgotPasswordFlow from "./Components/Auth/Password/ForgotPasswordFlow";
 
 const routes = [
   {
     path: "/",
-    element: <Main/>
+    element: <Main />,
   },
   {
     path: "/register",
-    element: <Register/>
+    element: <Register />,
   },
   {
     path: "/login",
-    element: <Login/>
+    element: <Login />,
   },
   {
     path: "/company/panel/login",
-    element : <CompanyPanelLogin/>
+    element: <CompanyPanelLogin />,
   },
   {
     path: "/company/verify",
-    element: <CompanyVerificationForm/>
+    element: <CompanyVerificationForm />,
   },
   {
     path: "/company/uploaded-documents",
-    element: <Unverified/>
+    element: <Unverified />,
   },
   {
     path: "/Admin/Internal/Panel",
-    element: isLoggedIn() ? <AdminInternalPanel/> : <Navigate to="/login"/>
+    element: isLoggedIn() ? <AdminInternalPanel /> : <Navigate to="/login" />,
   },
   {
     path: "/company/dashboard",
-    element:<CompanyAdminlPanel/> 
+    element: <CompanyAdminlPanel />,
   },
   {
     path: "/job-listings",
-    element:<JobListings/> 
+    element: <JobListings />,
   },
   {
     path: "/job-listings/:id",
-    element:<JobListingsById/>
+    element: <JobListingsById />,
   },
   {
     path: "/my-applications",
-    element:<MyApplications/>
+    element: <MyApplications />,
+  },
+  {
+    path:"/profile",
+    element: <Profile />
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPasswordFlow />,
   },
   {
     path: "/*",
-    element: <Error404/>
-  }
+    element: <Error404 />,
+  },
 ];
 
 function App() {
-  
   return (
     <Router>
       <div>
-      <ErrorBoundary>
-
-        <Routes>
-          {routes.map((route, index) => (
-            <Route key={index} path={route.path} element={route.element} />
-          ))}
-        </Routes>      </ErrorBoundary>
-
+        <ErrorBoundary>
+          <Routes>
+            {routes.map((route, index) => (
+              <Route key={index} path={route.path} element={route.element} />
+            ))}
+          </Routes>{" "}
+        </ErrorBoundary>
       </div>
-
     </Router>
   );
 }
