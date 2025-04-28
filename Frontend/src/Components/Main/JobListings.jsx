@@ -18,6 +18,8 @@ const JobListings = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [wageRange, setWageRange] = useState(5000);
+  const [minWageRange, setMinWageRange] = useState(0);
+
   const [cities, setCities] = useState([]);
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
@@ -33,6 +35,7 @@ const JobListings = () => {
             name: searchTerm,
             city: selectedCity,
             max_wage: wageRange,
+            min_wage: minWageRange,
             tag: selectedTag,
             employment_type: employmentType,
             experience_level: experienceLevel,
@@ -47,7 +50,8 @@ const JobListings = () => {
         }
       );
 
-      setJobs(response.data.data || response.data.jobs);
+      setJobs(response.data.data);
+console.log(response.data);
 
       const uniqueCities = [
         ...new Set(
@@ -68,7 +72,7 @@ const JobListings = () => {
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm, selectedCity, wageRange]);
+  }, [searchTerm, selectedCity, wageRange, minWageRange, employmentType, experienceLevel, selectedTag, selectedBenefits, selectedHashtags, deadline]);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -86,48 +90,59 @@ const JobListings = () => {
     </div>
   
     <div className="flex flex-col lg:flex-row gap-8 pb-8 relative">
-      {/* Sidebar (shown on large screens or mobile toggle) */}
-      <div
-        className={`${
-          showMobileSidebar
-            ? "absolute top-0 left-0 w-3/4 h-full bg-white z-20 p-4 shadow-lg"
-            : "hidden"
-        } lg:block lg:static lg:w-1/4`}
+  {/* Modal background for mobile sidebar */}
+  {showMobileSidebar && (
+    <div
+      className="modal-bg lg:hidden"
+      onClick={() => setShowMobileSidebar(false)}
+    />
+  )}
+
+  {/* Sidebar */}
+  <div
+    className={`${
+      showMobileSidebar
+        ? "fixed top-0 left-0 w-5/6 max-w-xs h-full bg-white z-50 p-4 shadow-lg"
+        : "hidden"
+    } lg:block lg:static lg:w-1/4`}
+  >
+    {/* Close button for mobile */}
+    <div className="lg:hidden flex justify-end mb-2">
+      <button
+        onClick={() => setShowMobileSidebar(false)}
+        className="text-gray-500 hover:text-gray-800"
       >
-        {/* Close button for mobile */}
-        <div className="lg:hidden flex justify-end mb-2">
-          <button
-            onClick={() => setShowMobileSidebar(false)}
-            className="text-gray-500 hover:text-gray-800"
-          >
-            ✕
-          </button>
-        </div>
-        <JobFilterSidebar
-          {...{
-            searchTerm,
-            setSearchTerm,
-            selectedCity,
-            setSelectedCity,
-            cities,
-            wageRange,
-            setWageRange,
-            employmentType,
-            setEmploymentType,
-            experienceLevel,
-            setExperienceLevel,
-            selectedTag,
-            setSelectedTag,
-            selectedBenefits,
-            setSelectedBenefits,
-            selectedHashtags,
-            setSelectedHashtags,
-            deadline,
-            setDeadline,
-          }}
-        />
-      </div>
-  
+        ✕
+      </button>
+    </div>
+
+    <JobFilterSidebar
+      {...{
+        searchTerm,
+        setSearchTerm,
+        selectedCity,
+        setSelectedCity,
+        cities,
+        wageRange,
+        setWageRange,
+        minWageRange,
+        setMinWageRange,
+        employmentType,
+        setEmploymentType,
+        experienceLevel,
+        setExperienceLevel,
+        selectedTag,
+        setSelectedTag,
+        selectedBenefits,
+        setSelectedBenefits,
+        selectedHashtags,
+        setSelectedHashtags,
+        deadline,
+        setDeadline,
+      }}
+    />
+  </div>
+
       {/* Job listings */}
       <div className="flex-grow lg:w-3/4">
         {loading ? (
@@ -135,7 +150,7 @@ const JobListings = () => {
             <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
           </div>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mt-10">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 mt-10 mx-4">
             {jobs.map((job) => (
               <div
                 key={job.id}

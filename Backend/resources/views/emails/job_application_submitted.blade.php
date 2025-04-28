@@ -118,10 +118,10 @@
         <div class="footer">
             <p>Follow us for updates & tips:</p>
             <div class="social-icons">
-                <a href="https://facebook.com/yourpage"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
-                <a href="https://twitter.com/yourhandle"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter"></a>
-                <a href="https://instagram.com/yourprofile"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram"></a>
-                <a href="https://linkedin.com/company/yourcompany"><img src="https://cdn-icons-png.flaticon.com/512/733/733561.png" alt="LinkedIn"></a>
+                <a href="https://facebook.com/worksy"><img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="Facebook"></a>
+                <a href="https://twitter.com/worksy"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter"></a>
+                <a href="https://instagram.com/worksy"><img src="https://cdn-icons-png.flaticon.com/512/733/733558.png" alt="Instagram"></a>
+                <a href="https://linkedin.com/company/worksy"><img src="https://cdn-icons-png.flaticon.com/512/733/733561.png" alt="LinkedIn"></a>
             </div>
             <p>© {{ date('Y') }} Worksy. All rights reserved.</p>
         </div>

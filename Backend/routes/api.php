@@ -31,6 +31,7 @@ Route::post('company-user/login', [CompanyUserLoginController::class, 'login']);
 Route::get('/public/jobs', [JobController::class, 'publicIndex']);
 Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
+Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 
 //Protected routes i vendos ketu

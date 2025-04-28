@@ -44,6 +44,12 @@ public function publicIndex(Request $request)
             $q->where('wage', '<=', $request->max_wage);
         });
     }
+    if ($request->filled('min_wage')) {
+        $query->whereHas('details', function ($q) use ($request) {
+            $q->where('wage', '>=', $request->min_wage);
+        });
+    }
+    
     if ($request->filled('employment_type')) {
         $query->whereHas('details', function ($q) use ($request) {
             $q->where('employment_type', 'like', '%' . $request->employment_type . '%');
@@ -78,7 +84,7 @@ public function publicIndex(Request $request)
     $query->orderBy($sortBy, $sortOrder);
 
     // Pagination
-    $perPage = $request->get('per_page', 10);
+    $perPage = $request->get('per_page', 20);
     $jobs = $query->paginate($perPage);
 
     return response()->json($jobs);

@@ -8,6 +8,8 @@ const JobFilterSidebar = ({
   cities,
   wageRange,
   setWageRange,
+  setMinWageRange,
+  minWageRange, 
   employmentType,
   setEmploymentType,
   experienceLevel,
@@ -61,8 +63,18 @@ const JobFilterSidebar = ({
           className="w-full"
         />
       </div>
-
       <div>
+        <label className="block text-sm font-medium mb-1">Min Wage: €{minWageRange}</label>
+        <input
+          type="range"
+          min="0"
+          max="5000"
+          value={minWageRange}
+          onChange={(e) => setMinWageRange(e.target.value)}
+          className="w-full"
+        />
+      </div>
+      {/* <div>
         <label className="block text-sm font-medium mb-1">Employment Type</label>
         <input
           type="text"
@@ -120,7 +132,7 @@ const JobFilterSidebar = ({
           onChange={(e) => setDeadline(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
         />
-      </div>
+      </div> */}
     </div>
   );
 };

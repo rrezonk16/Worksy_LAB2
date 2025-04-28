@@ -116,8 +116,6 @@
 
     <p>💼 Whether you're looking for your next big gig or just browsing what's out there, we've got your back.</p>
 
-    <a href="{{ url('/dashboard') }}" class="button">Go to My Dashboard</a>
-
     <p style="margin-top: 32px;">If you ever need help, feel free to reach out. We're here to support you on your journey.</p>
 
     <p>Welcome aboard and let’s make something amazing happen ✨</p>
