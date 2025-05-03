@@ -105,6 +105,23 @@ public function publicIndex(Request $request)
         ]);
     }
 
+    public function premiumPublicJobs()
+    {
+        $jobs = Job::with([
+            'questions.options',
+            'company',
+            'details'
+        ])
+        ->inRandomOrder()
+        ->take(3)
+        ->get();
+    
+        return response()->json([
+            'data' => $jobs
+        ]);
+    }
+    
+
     public function index(Request $request)
     {
         $companyUser = auth()->user();

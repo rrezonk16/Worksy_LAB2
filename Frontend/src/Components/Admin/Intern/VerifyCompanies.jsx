@@ -7,6 +7,7 @@ const VerifyCompanies = () => {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
@@ -20,8 +21,22 @@ const VerifyCompanies = () => {
           }
         );
         console.log("Companies:", response.data);        
-        setCompanies(response.data);
-      } catch (error) {
+        const transformedCompanies = response.data.companies.map((company) => ({
+          company_id: company.id,
+          company_name: company.name,
+          company_nui: company.nui,
+          company_email: company.email,
+          company_phone_number: company.phone_number,
+          created_at: company.verifications?.created_at_formatted || "-",
+          updated_at: company.verifications?.updated_at_formatted || "-",
+          status: company.verifications?.status || "-",
+          company_certificate_url: company.verifications?.company_certificate_url,
+          owner_id_front: company.verifications?.owner_id_front,
+          owner_id_back: company.verifications?.owner_id_back,
+        }));
+        
+        setCompanies(transformedCompanies);
+              } catch (error) {
         console.error("Error fetching companies:", error);
       }
     };
@@ -133,6 +148,7 @@ const VerifyCompanies = () => {
             >
               Activate
             </button>
+
           );
         }
         return null;

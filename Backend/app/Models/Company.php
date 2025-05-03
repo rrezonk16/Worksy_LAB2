@@ -10,12 +10,12 @@ class Company extends Model {
 
     protected $fillable = [
         'name', 'nui', 'number_of_employees', 'email', 'city', 'country',
-        'address', 'phone_number', 'njesite', 'activities', 'logo_url'
+        'address', 'phone_number', 'njesia', 'activities', 'logo_url'
     ];
     
 
     protected $casts = [
-        'njesite' => 'array',
+        'njesia' => 'array',
         'activities' => 'array',
     ];
 
@@ -26,7 +26,11 @@ class Company extends Model {
     public function roles() {
         return $this->hasMany(CompanyRole::class);
     }
-
+    public function subscriptions()
+    {
+        return $this->hasMany(CompanySubscription::class);
+    }
+    
     public function verifications() {
         return $this->hasOne(CompanyVerification::class);
     }

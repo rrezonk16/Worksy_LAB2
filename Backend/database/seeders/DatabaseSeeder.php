@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,   // Seeder for linking roles and permissions
             CompanyRolesSeeder::class,     // Seeder for company-specific roles
             UserSeeder::class,
+            SubscriptionFeaturesSeeder::class,
 
         ]);
     }

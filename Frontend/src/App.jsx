@@ -8,7 +8,7 @@ import Error404 from "./Components/ErrorPages/Error404";
 import Register from "./Components/Auth/Register";
 import Login from "./Components/Auth/Login";
 import AdminInternalPanel from "./Components/Admin/Intern/AdminInternalPanel";
-import Main from "./Components/Main/Main";
+import Main from "./assets/Main";
 import CompanyVerificationForm from "./Components/Auth/CompanyVerificationForm";
 import CompanyPanelLogin from "./Components/Auth/CompanyPanelLogin";
 import isLoggedIn from "./Components/Functions/isLoggedIn";
@@ -21,6 +21,12 @@ import MyApplications from "./Components/Jobs/MyApplications";
 import ErrorBoundary from "./Components/Functions/ErrorBoundary";
 import Profile from "./Components/Admin/User/Profile";
 import ForgotPasswordFlow from "./Components/Auth/Password/ForgotPasswordFlow";
+import Subscribe from "./Components/Premium/Subscribe";
+import Checkout from "./Components/Premium/Checkout";
+import Success from "./Components/Premium/Success";
+import Rejected from "./Components/Admin/Company/Rejected";
+import WelcomeCompany from "./Components/Employers/WelcomeCompany";
+import SubscribePage from "./Components/Premium/SubscribePage";
 
 const routes = [
   {
@@ -46,6 +52,10 @@ const routes = [
   {
     path: "/company/uploaded-documents",
     element: <Unverified />,
+  },
+  {
+    path : "/company/rejected-documents",
+    element: <Rejected />,
   },
   {
     path: "/Admin/Internal/Panel",
@@ -74,6 +84,22 @@ const routes = [
   {
     path: "/forgot-password",
     element: <ForgotPasswordFlow />,
+  },
+  {
+    path: "/subscribe",
+    element: <SubscribePage />,
+  },
+  {
+    path: "/checkout",
+    element: <Checkout />,
+  },
+  {
+    path:"/success",
+    element: <Success />
+  },
+  {
+    path: "/for-employers",
+    element: <WelcomeCompany />,
   },
   {
     path: "/*",

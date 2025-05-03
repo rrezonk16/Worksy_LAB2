@@ -107,7 +107,6 @@ const Profile = () => {
     email,
     phone_number,
     created_at,
-    updated_at,
     details,
   } = formData;
 
@@ -138,9 +137,8 @@ const Profile = () => {
           <div className="relative w-40 h-40 group">
             <img
               src={
-                user.details?.profile_image || "https://via.placeholder.com/150"
+                user.details?.profile_image || "https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg"
               }
-              alt="Profile"
               className="rounded-full w-full h-full object-cover border-4 border-gray-300"
             />
             <div
@@ -204,11 +202,9 @@ const Profile = () => {
             </div>
             <div>
               <p className="text-sm text-gray-500">
-                Created: {new Date(created_at).toLocaleDateString()}
+                Profile Created: {new Date(created_at).toLocaleDateString()}
               </p>
-              <p className="text-sm text-gray-500">
-                Updated: {new Date(updated_at).toLocaleDateString()}
-              </p>
+             
             </div>
           </div>
         </div>
