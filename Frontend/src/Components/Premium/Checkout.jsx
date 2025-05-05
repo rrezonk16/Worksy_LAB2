@@ -10,6 +10,7 @@ const Checkout = () => {
   const { plan, amount } = location.state || {};
   const [orderId, setOrderId] = useState("");
   const [loading, setLoading] = useState(false);
+  const token = import.meta.env.VITE_PAYMENT_TOKEN;
 
   useEffect(() => {
     if (!plan || !amount) {
@@ -36,10 +37,9 @@ const Checkout = () => {
         paymentData,
         {
           headers: {
-            Token:
-              "f9e10c50c5464f54915283aa40a4d821:ac1fc70189ef44d5b5fc1265b93abf1b",
+            Token: token,
             "Content-Type": "application/json",
-          },
+          }
         }
       );
 
