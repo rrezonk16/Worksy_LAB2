@@ -1,0 +1,23 @@
+.custom-border-green {
+  border-top: 2px solid #4CAF50;
+}
+
+.bg-custom-gray {
+  background-color: #f7f7f7;
+}
+
+.bg-custom-white {
+  background-color: #ffffff;
+}
+
+.text-custom-dark {
+  color: #333333;
+}
+
+.bg-custom-green {
+  background-color: #4CAF50;
+}
+
+.text-custom-light {
+  color: #999999;
+}

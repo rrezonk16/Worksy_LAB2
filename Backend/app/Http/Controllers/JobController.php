@@ -251,4 +251,11 @@ public function publicIndex(Request $request)
             ], 500);
         }
     }
+    public function shareJob($id)
+    {
+        $job = Job::with('company', 'details', 'questions')->findOrFail($id);
+
+        // Pass job data to the view
+        return view('share.job', compact('job'));
+    }
 }

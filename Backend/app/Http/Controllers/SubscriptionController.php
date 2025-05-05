@@ -12,6 +12,36 @@ use Carbon\Carbon;
 
 class SubscriptionController extends Controller
 {
+    public function getSubscriptionByCompanyUser(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        if (!$user->company_id) {
+            return response()->json(['error' => 'No company associated with the user'], 403);
+        }
+
+        $company = Company::find($user->company_id);
+
+        if (!$company) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $subscription = CompanySubscription::where('company_id', $company->id)->first();
+
+        if (!$subscription) {
+            return response()->json(['message' => 'No active subscription for this company.'], 404);
+        }
+
+        return response()->json([
+            'subscription_type' => $subscription->subscription_type,
+            'start_date' => $subscription->start_date,
+            'end_date' => $subscription->end_date,
+        ], 200);
+    }
     public function store(Request $request)
     {
         $validated = $request->validate([

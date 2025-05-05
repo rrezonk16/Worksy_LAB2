@@ -27,6 +27,7 @@ import Success from "./Components/Premium/Success";
 import Rejected from "./Components/Admin/Company/Rejected";
 import WelcomeCompany from "./Components/Employers/WelcomeCompany";
 import SubscribePage from "./Components/Premium/SubscribePage";
+import ApplicationsDetails from "./Components/Jobs/ApplicationsDetails";
 
 const routes = [
   {
@@ -100,6 +101,10 @@ const routes = [
   {
     path: "/for-employers",
     element: <WelcomeCompany />,
+  },
+  {
+    path: "/my-applications/:id",
+    element: <ApplicationsDetails />,
   },
   {
     path: "/*",

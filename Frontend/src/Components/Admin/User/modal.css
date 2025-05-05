@@ -31,3 +31,37 @@
     justify-content: center;
     z-index: 50;
   }
+  /* styles.css */
+
+/* Custom colors */
+.custom-green {
+  background-color: #10B981; /* Custom green */
+}
+
+.custom-gray {
+  background-color: #F3F4F6; /* Custom gray */
+}
+
+.custom-dark {
+  color: #1F2937; /* Dark text color */
+}
+
+.custom-light {
+  color: #E5E7EB; /* Light text color */
+}
+
+.custom-border-green {
+  border-color: #10B981; /* Custom green border */
+}
+
+.text-custom-dark {
+  color: #1F2937; /* Dark text color */
+}
+
+.text-custom-light {
+  color: #E5E7EB; /* Light text color */
+}
+
+.bg-custom-white {
+  background-color: white;
+}

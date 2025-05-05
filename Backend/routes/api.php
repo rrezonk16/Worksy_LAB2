@@ -35,6 +35,7 @@ Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::get('/api/jobs/{id}', [JobController::class, 'show']);
 
 //Protected routes i vendos ketu
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -52,7 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::delete('/{id}', [CompanyController::class, 'destroy']);      // Delete company
     });
     Route::get('/download-logs', [\App\Http\Controllers\ApiLogController::class, 'downloadLogs']);
-
+    Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);
     Route::get('/company-verification/{companyId}', [CompanyVerificationController::class, 'getCompanyVerification']);
     Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:APPROVE_APPLICATION');
     Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
@@ -69,6 +70,7 @@ Route::middleware('auth:sanctum')->get('/my-applications', [JobApplicationContro
 Route::middleware('auth:sanctum')->post('/company/logo', [CompanyController::class, 'uploadLogo']);
 Route::middleware('auth:sanctum')->get('/me', [UserController::class, 'getMyDetails']);
 Route::middleware('auth:sanctum')->post('/subscribe-premium', [SubscriptionController::class, 'store']);
+Route::middleware('auth:sanctum')->get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
 
 
 

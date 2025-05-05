@@ -18,19 +18,19 @@ class JobApplicationController extends Controller
     {
         $user = auth()->user();
     
-        // Retrieve applications, including job, answers with questions, and the company associated with the job
         $applications = $user->jobApplications()
-            ->with(['job.company', 'answers.question']) // Eager load job with company and answers with questions
+            ->with(['job.company', 'answers.question'])
             ->get()
             ->map(function ($application) {
                 return [
+                    'application_id' => $application->id, // Include application ID
                     'job' => [
                         'id' => $application->job->id,
                         'title' => $application->job->title,
                         'description' => $application->job->description,
                         'company' => [
-                            'name' => $application->job->company->name, // Company details
-                            'logo' => $application->job->company->logo, // Company logo or any other company details
+                            'name' => $application->job->company->name,
+                            'logo' => $application->job->company->logo,
                         ]
                     ],
                     'answers' => $application->answers->map(function ($answer) {
@@ -41,7 +41,7 @@ class JobApplicationController extends Controller
                             'answer' => $answer->answer,
                             'created_at' => $answer->created_at,
                             'updated_at' => $answer->updated_at,
-                            'question_text' => $answer->question ? $answer->question->question_text : null, // Ensure we fetch the question text
+                            'question_text' => $answer->question ? $answer->question->question_text : null,
                         ];
                     }),
                 ];
@@ -52,7 +52,65 @@ class JobApplicationController extends Controller
         ]);
     }
     
+    public function getApplicationById($applicationId)
+    {
+        $user = auth()->user();
     
+        $application = JobApplication::with([
+            'job.company',
+            'job.details',
+            'job.questions.options',
+            'user',
+            'answers.question'
+        ])
+            ->where('id', $applicationId)
+            ->where('user_id', $user->id)
+            ->first();
+    
+        if (!$application) {
+            return response()->json(['message' => 'Application not found.'], 404);
+        }
+    
+        return response()->json([
+            'application' => [
+                'application_id' => $application->id,
+                'job' => [
+                    ...$application->job->toArray(), // includes title, description, etc.
+                    'company' => $application->job->company->toArray(),
+                    'details' => $application->job->details ? $application->job->details->toArray() : null,
+                    'questions' => $application->job->questions->map(function ($q) {
+                        return [
+                            'id' => $q->id,
+                            'question_text' => $q->question_text,
+                            'input_type' => $q->input_type,
+                            'is_required' => $q->is_required,
+                            'options' => $q->options->map(function ($o) {
+                                return [
+                                    'id' => $o->id,
+                                    'option_text' => $o->option_text
+                                ];
+                            })
+                        ];
+                    }),
+                ],
+                'user' => [
+                    'id' => $application->user->id,
+                    'name' => $application->user->name,
+                    'email' => $application->user->email,
+                ],
+                'answers' => $application->answers->map(function ($answer) {
+                    return [
+                        'id' => $answer->id,
+                        'job_question_id' => $answer->job_question_id,
+                        'question_text' => $answer->question ? $answer->question->question_text : null,
+                        'answer' => $answer->answer,
+                    ];
+                }),
+            ]
+        ]);
+    }
+    
+
     public function apply(Request $request)
     {
         $request->validate([
@@ -64,6 +122,16 @@ class JobApplicationController extends Controller
 
         $user = auth()->user();
         $job = Job::with('company')->findOrFail($request->job_id);
+
+        $alreadyApplied = JobApplication::where('job_id', $request->job_id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if ($alreadyApplied) {
+            return response()->json([
+                'message' => 'You have already applied to this job.'
+            ], 409); // 409 Conflict
+        }
 
         $application = JobApplication::create([
             'job_id' => $request->job_id,
@@ -98,6 +166,7 @@ class JobApplicationController extends Controller
             'message' => 'Application submitted successfully.'
         ]);
     }
+
     public function getApplicationsForJob($jobId)
     {
         $companyUser = auth()->user();

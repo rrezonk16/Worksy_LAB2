@@ -1,0 +1,158 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import Navbar from "../Navigation/Navbar";
+import Footer from "../Navigation/Footer";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+import "./styles.css";
+
+const ApplicationsDetails = () => {
+  const { id } = useParams();
+  const [application, setApplication] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const printRef = useRef();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    axios
+      .get(`http://localhost:8000/api/applications/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setApplication(response.data.application);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching application data:", error);
+        setLoading(false);
+      });
+  }, [id]);
+
+  const handleDownloadPDF = () => {
+    const element = printRef.current;
+
+    if (element) {
+      // Capture the div content as a canvas
+      html2canvas(element, { scale: 2 }).then((canvas) => {
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        // Get image data from the canvas
+        const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+        // Adjusting the size to prevent stretching, and maintaining aspect ratio
+        const pdfWidth = 210; // A4 width in mm
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+        // Adding the image to the PDF
+        pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+
+        // Save the generated PDF
+        pdf.save(`application_${id}.pdf`);
+      });
+    } else {
+      console.error("Print element not found.");
+    }
+  };
+
+  if (loading) return <div className="text-center mt-10">Loading...</div>;
+  if (!application)
+    return <div className="text-center mt-10">Application not found.</div>;
+
+  const { job, user, answers } = application;
+  const { company, details } = job;
+  const currentDate = new Date().toLocaleDateString();
+
+  return (
+    <div className="min-h-screen bg-custom-gray">
+      <Navbar />
+
+      <div className="max-w-4xl mx-auto p-6 shadow rounded my-10">
+        <div className="mb-4 text-right">
+          <button
+            onClick={handleDownloadPDF}
+            className="bg-custom-green hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
+          >
+            Download PDF
+          </button>
+        </div>
+
+        {/* Printable Area */}
+        <div ref={printRef} className="bg-custom-white text-custom-dark p-6">
+          {/* Logo and Top Green Line */}
+          <div className="mb-4">
+            <img src="/logo.png" alt="Logo" className="h-16 mb-2" />
+            <div className="h-1 custom-border-green w-full mb-4" />
+          </div>
+
+          {/* Application Content */}
+          <h1 className="text-2xl font-bold mb-2">{job.title}</h1>
+          <p className="mb-4">{job.description}</p>
+
+          <div className="mb-6">
+            <h2 className="text-xl font-semibold">Company: {company.name}</h2>
+            <p>Email: {company.email}</p>
+            <p>Phone: {company.phone_number}</p>
+            <p>Locations: {company.njesia.join(", ")}</p>
+            <p>Activities: {company.activities.join(", ")}</p>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold">Job Details</h3>
+            <p>Wage: €{details.wage}</p>
+            <p>Location: {details.location}</p>
+            <p>Type: {details.employment_type}</p>
+            <p>Experience Level: {details.experience_level}</p>
+            <p>Deadline: {new Date(details.deadline).toLocaleDateString()}</p>
+            <p>Benefits: {details.benefits.join(", ")}</p>
+            <p>
+              Hashtags: {details.hashtags.map((tag) => `#${tag}`).join(" ")}
+            </p>
+          </div>
+
+          <div className="mb-6">
+            <h3 className="text-lg font-semibold">Applicant</h3>
+            <p>Name: {user.name}</p>
+            <p>Email: {user.email}</p>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold mb-2">Answers</h3>
+            <ul className="list-disc pl-5">
+              {answers.map((answer) => (
+                <li key={answer.id}>
+                  <strong>{answer.question_text}:</strong> {answer.answer}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8">
+            <div className="h-1 custom-border-green w-full mb-4" />
+            <div className=" flex flex-row justify-between">
+              <div> Worksy.com </div>
+              <div>{currentDate} </div>
+              <div>&copy; WORKSY</div>
+            </div>
+
+            <div className="text-center text-sm text-gray-500 mt-10">
+              This document is generated by Worksy and is intended for the
+              applicant's records.
+              <br />
+              For any inquiries, please contact us at{" "}
+              <a href="mailto:admin@worksy.com" className="text-blue-500"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default ApplicationsDetails;
