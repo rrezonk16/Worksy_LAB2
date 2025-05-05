@@ -1,7 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Footer from '../Navigation/Footer';
-import Navbar from '../Navigation/Navbar';
+import Footer from '../Components/Navigation/Footer';
+import Navbar from '../Components/Navigation/Navbar';
+import PremiumSection from '../Components/Main/PremiumSection';
+import phoneUi from '../assets/phone_ui.png';
+import mark_review from '../assets/mark_review.png';
+import emma_review from '../assets/emma_review.png';
 const Main = () => {
   const navigate = useNavigate();
 
@@ -18,7 +22,7 @@ const Main = () => {
         </div>
         
         <div className="flex justify-end w-full lg:w-1/2">
-          <img src="/public/png1.png" alt="Phone UI" className="max-w-md" />
+          <img src={phoneUi} alt="Phone UI" className="max-w-md" />
         </div>
       </section>
 
@@ -26,7 +30,7 @@ const Main = () => {
       <section className="bg-white py-16 px-8 lg:px-32">
         <div className="flex flex-col lg:flex-row gap-8">
           <div className="bg-white rounded-xl shadow p-6 text-center">
-            <img src="/public/person2.png" alt="Mark T." className="w-24 h-24 mx-auto rounded-full mb-4" />
+            <img src={mark_review} alt="Mark T." className="w-24 h-24 mx-auto rounded-full mb-4" />
             <h4 className="font-bold">Mark T.</h4>
             <p className="text-sm text-gray-500 mb-2">HR Manager</p>
             <p className="italic text-gray-700 mb-2">“As a recruiter, I love how Worksy streamlines the hiring process. It’s efficient and user-friendly!”</p>
@@ -34,7 +38,7 @@ const Main = () => {
           </div>
 
           <div className="bg-white rounded-xl shadow p-6 text-center">
-            <img src="/public/person1.png" alt="Emma R." className="w-24 h-24 mx-auto rounded-full mb-4" />
+            <img src={emma_review} alt="Emma R." className="w-24 h-24 mx-auto rounded-full mb-4" />
             <h4 className="font-bold">Emma R.</h4>
             <p className="text-sm text-gray-500 mb-2">Graphic Designer</p>
             <p className="italic text-gray-700 mb-2">“Worksy made job hunting so easy! I found my dream job within a week. Highly recommend!”</p>
@@ -42,22 +46,9 @@ const Main = () => {
           </div>
         </div>
       </section>
+      <PremiumSection />
 
-      {/* Explore Jobs */}
-      <section className="bg-gray-100 py-16 px-8 lg:px-32 text-center">
-        <h3 className="text-xl italic mb-6">Explore Thousands of <span className="text-green-600 font-bold">Jobs</span></h3>
-        <div className="flex flex-wrap justify-center gap-6 mb-6">
-          {['Full-time', 'Part-time', 'Freelance', 'Remote Work'].map((type, i) => (
-            <div key={i} className="flex flex-col items-center text-sm">
-              <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center mb-2">
-                <span>{type[0]}</span>
-              </div>
-              <p>{type}</p>
-            </div>
-          ))}
-        </div>
-        <button onClick={() => navigate('/register')} className="bg-green-500 text-white px-6 py-2 rounded-full">Join now</button>
-      </section>
+
 
       <Footer />
     </div>

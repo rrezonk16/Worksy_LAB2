@@ -21,6 +21,7 @@ use App\Http\Controllers\CompanyUserLoginController;
 use App\Http\Controllers\CompanyVerificationController;
 use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserDetailController;
 
 //Open routes i vendos ketu
@@ -29,10 +30,12 @@ Route::post('login', [UserController::class, 'login']);
 Route::post('register/company', [CompanyController::class, 'register']);
 Route::post('company-user/login', [CompanyUserLoginController::class, 'login']);
 Route::get('/public/jobs', [JobController::class, 'publicIndex']);
+Route::get('/premium/jobs', [JobController::class, 'premiumPublicJobs']);
 Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::get('/api/jobs/{id}', [JobController::class, 'show']);
 
 //Protected routes i vendos ketu
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -42,10 +45,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('users/me', [UserController::class, 'updateMyUserData']);
     Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:EDIT_USERS');
     Route::delete('users/{id}', [UserController::class, 'softDeleteUser'])->middleware('permission:DELETE_USERS');
+
+    Route::prefix('companies')->group(function () {
+        Route::get('/', [CompanyController::class, 'index']);               // Get all companies
+        Route::get('/{id}', [CompanyController::class, 'show']);            // Get single company with details
+        Route::put('/{id}', [CompanyController::class, 'update']);          // Update company and its details
+        Route::delete('/{id}', [CompanyController::class, 'destroy']);      // Delete company
+    });
+    Route::get('/download-logs', [\App\Http\Controllers\ApiLogController::class, 'downloadLogs']);
+    Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);
     Route::get('/company-verification/{companyId}', [CompanyVerificationController::class, 'getCompanyVerification']);
     Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:APPROVE_APPLICATION');
     Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
-    Route::get('/companies', [CompanyVerificationController::class, 'getCompanies']);
     Route::post('/apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
     Route::get('/get-my-permissions', [UserController::class, 'getMyPermissions']);
     Route::post('/user/profile-image-update', [UserDetailController::class, 'updateProfileImage']);
@@ -58,6 +69,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 Route::middleware('auth:sanctum')->get('/my-applications', [JobApplicationController::class, 'getUserApplications']);
 Route::middleware('auth:sanctum')->post('/company/logo', [CompanyController::class, 'uploadLogo']);
 Route::middleware('auth:sanctum')->get('/me', [UserController::class, 'getMyDetails']);
+Route::middleware('auth:sanctum')->post('/subscribe-premium', [SubscriptionController::class, 'store']);
+Route::middleware('auth:sanctum')->get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
 
 
 

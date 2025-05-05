@@ -1,18 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
-import logo_full from '../../assets/logo_full.png';
-import { useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
-import { gsap } from 'gsap';
+import React, { useState, useRef, useEffect } from "react";
+import logo_full from "../../assets/logo_full.png";
+import { useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import { gsap } from "gsap";
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/');
+    localStorage.removeItem("token");
+    navigate("/");
   };
 
   const toggleMenu = () => {
@@ -24,14 +24,14 @@ const Navbar = () => {
       gsap.fromTo(
         menuRef.current,
         { y: -20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.3, ease: 'power2.out' }
+        { y: 0, opacity: 1, duration: 0.3, ease: "power2.out" }
       );
     } else {
       gsap.to(menuRef.current, {
         y: -20,
         opacity: 0,
         duration: 0.2,
-        ease: 'power2.in',
+        ease: "power2.in",
       });
     }
   }, [menuOpen]);
@@ -47,16 +47,28 @@ const Navbar = () => {
       <div className="hidden md:flex space-x-4 items-center">
         {!token ? (
           <>
-            <button className="text-gray-800 font-medium">About Us</button>
             <button
-              onClick={() => navigate('/login')}
-              className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
+              onClick={() => navigate("/job-listings")}
+              className="text-gray-800 font-medium cursor-pointer  "
+            >
+              Job Listings
+            </button>
+            <button
+              onClick={() => navigate("/for-employers")}
+              className="text-gray-800 font-medium cursor-pointer  "
+            >
+              Post Jobs
+            </button>
+
+            <button
+              onClick={() => navigate("/login")}
+              className="px-4  cursor-pointer py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
             >
               Login
             </button>
             <button
-              onClick={() => navigate('/register')}
-              className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
+              onClick={() => navigate("/register")}
+              className="px-4 cursor-pointer  py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
             >
               Join now
             </button>
@@ -64,26 +76,26 @@ const Navbar = () => {
         ) : (
           <>
             <button
-              onClick={() => navigate('/profile')}
-              className="text-gray-800 font-medium"
+              onClick={() => navigate("/profile")}
+              className="text-gray-800 font-medium cursor-pointer "
             >
               Profile
             </button>
             <button
-              onClick={() => navigate('/my-applications')}
-              className="text-gray-800 font-medium"
+              onClick={() => navigate("/my-applications")}
+              className="text-gray-800 font-medium cursor-pointer "
             >
               My Applications
             </button>
             <button
-              onClick={() => navigate('/job-listings')}
-              className="text-gray-800 font-medium"
+              onClick={() => navigate("/job-listings")}
+              className="text-gray-800 font-medium cursor-pointer"
             >
               View Jobs
             </button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
+              className="px-4 py-2 border cursor-pointer  border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
             >
               Logout
             </button>
@@ -100,7 +112,7 @@ const Navbar = () => {
       <div
         ref={menuRef}
         className={`absolute top-full left-0 w-full bg-white shadow-md flex flex-col items-start px-6 py-4 space-y-3 md:hidden z-50 ${
-          menuOpen ? 'block' : 'hidden'
+          menuOpen ? "block" : "hidden"
         }`}
       >
         {!token ? (
@@ -108,7 +120,7 @@ const Navbar = () => {
             <button className="text-gray-800 font-medium">About Us</button>
             <button
               onClick={() => {
-                navigate('/login');
+                navigate("/login");
                 setMenuOpen(false);
               }}
               className="w-full text-left"
@@ -117,7 +129,7 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => {
-                navigate('/register');
+                navigate("/register");
                 setMenuOpen(false);
               }}
               className="w-full text-left"
@@ -129,7 +141,7 @@ const Navbar = () => {
           <>
             <button
               onClick={() => {
-                navigate('/profile');
+                navigate("/profile");
                 setMenuOpen(false);
               }}
               className="w-full text-left"
@@ -138,7 +150,7 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => {
-                navigate('/my-applications');
+                navigate("/my-applications");
                 setMenuOpen(false);
               }}
               className="w-full text-left"
@@ -147,7 +159,7 @@ const Navbar = () => {
             </button>
             <button
               onClick={() => {
-                navigate('/job-listings');
+                navigate("/job-listings");
                 setMenuOpen(false);
               }}
               className="w-full text-left"

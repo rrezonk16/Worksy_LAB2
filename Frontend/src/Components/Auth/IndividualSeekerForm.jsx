@@ -21,6 +21,7 @@ const IndividualSeekerForm = () => {
   });
 
   const [step, setStep] = useState(1);
+  const [errors, setErrors] = useState({}); // State to hold errors
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -39,16 +40,15 @@ const IndividualSeekerForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({}); // Reset errors on form submit
 
     try {
-      
-
       const response = await axios.post("http://localhost:8000/api/register/user", formData);
       console.log(response);
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       if (response.status === 201) {
-        navigate("/user-profile", {
+        navigate("/profile", {
           state: {
             name: formData.name,
             email: formData.email,
@@ -56,6 +56,9 @@ const IndividualSeekerForm = () => {
         });
       }
     } catch (error) {
+      if (error.response && error.response.data.errors) {
+        setErrors(error.response.data.errors); // Capture the error response
+      }
       console.error("Error registering:", error);
     }
   };
@@ -163,6 +166,9 @@ const IndividualSeekerForm = () => {
                   className="w-full px-4 py-2 mt-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-lightblue-500"
                   required
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p> // Display email error in red
+                )}
               </div>
 
               <div>

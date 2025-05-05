@@ -29,4 +29,15 @@ class Job extends Model
     return $this->hasOne(JobDetail::class);
 }
 
+public function show($id)
+{
+    $job = Job::find($id);
+
+    if (!$job) {
+        abort(404, "Job not found");
+    }
+
+    return view('share.job', ['job' => $job]);
+}
+
 }

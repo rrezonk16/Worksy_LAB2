@@ -11,10 +11,18 @@ const CompanyAdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedPermissions =
-      JSON.parse(localStorage.getItem("permissions")) || [];
-    setPermissions(storedPermissions);
-  }, []);
+    // Check if the company_user_token exists in localStorage
+    const token = localStorage.getItem("company_user_token");
+
+    if (!token) {
+      // If no token, navigate to the login page
+      navigate("/company/panel/login");
+    } else {
+      // Optionally, you can set permissions from the token or do other checks
+      const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
+      setPermissions(storedPermissions);
+    }
+  }, [navigate]);
 
   const getActiveTab = () => {
     const params = new URLSearchParams(location.search);
@@ -25,6 +33,7 @@ const CompanyAdminPanel = () => {
     localStorage.clear();
     navigate("/login");
   };
+
   const renderComponent = () => {
     switch (getActiveTab()) {
       case "make-job-listing":
@@ -37,7 +46,6 @@ const CompanyAdminPanel = () => {
         return <div>Dashboard</div>;
     }
   };
-  
 
   return (
     <div className="flex">

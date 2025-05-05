@@ -42,6 +42,9 @@ const CompanyPanelLogin = () => {
       else if (company_verification_status === "uploaded") {
         navigate("/company/uploaded-documents");
       }
+      else if (company_verification_status === "rejected") {
+        navigate("/company/rejected-documents");
+      }
     } catch (error) {
       setError(error.response?.data?.message || "Login failed. Please try again.");
     } finally {

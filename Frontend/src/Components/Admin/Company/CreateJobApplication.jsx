@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -18,7 +18,8 @@ const CreateJobApplication = () => {
   const [hashtags, setHashtags] = useState("");
   const [benefits, setBenefits] = useState("");
   const [deadline, setDeadline] = useState("");
-  
+  const [subscription, setSubscription] = useState(null);
+
   const premadeQuestions = [
     { question_text: "What is your first name?", input_type: "text" },
     { question_text: "What is your surname?", input_type: "text" },
@@ -28,8 +29,23 @@ const CreateJobApplication = () => {
       question_text: "Do you have experience in this field?",
       input_type: "yesno",
     },
+    {
+      question_text: "Upload your CV",
+      input_type: "file",
+    },
   ];
   const navigate = useNavigate();
+  
+  const handleButtonClick = () => {
+    if (subscription === null) {
+      const userConfirmed = window.confirm("You need to subscribe to use this feature. Do you want to subscribe?");
+      if (userConfirmed) {
+        navigate("/subscribe"); 
+      }
+    } else {
+      setShowQuestionForm(true); 
+    }
+  };
   const handleAddQuestion = () => {
     const newQuestion = {
       question_text: questionText,
@@ -58,12 +74,11 @@ const CreateJobApplication = () => {
       location,
       employment_type: employmentType,
       experience_level: experienceLevel,
-      hashtags: hashtags.split(",").map(tag => tag.trim()),
-      benefits: benefits.split(",").map(b => b.trim()),
+      hashtags: hashtags.split(",").map((tag) => tag.trim()),
+      benefits: benefits.split(",").map((b) => b.trim()),
       deadline,
     };
-    
-    console.log("Job Data:", jobData);
+
 
     try {
       const token = localStorage.getItem("company_user_token");
@@ -76,9 +91,8 @@ const CreateJobApplication = () => {
           },
         }
       );
-      console.log("Job created:", response.data);
       alert("Job created successfully!");
-      navigate ("/company/dashboard?active-tab=jobs-list");
+      navigate("/company/dashboard?active-tab=jobs-list");
     } catch (error) {
       console.error("Error creating job:", error);
     }
@@ -98,6 +112,32 @@ const CreateJobApplication = () => {
     const updatedQuestions = questions.filter((_, idx) => idx !== index);
     setQuestions(updatedQuestions);
   };
+  useEffect(() => {
+    const token = localStorage.getItem("company_user_token");
+
+    if (!token) {
+      navigate("/company/panel/login");
+      return;
+    }
+    axios
+      .get("http://localhost:8000/api/subscription", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 404) {
+          setSubscription(null);
+        } else {
+          setSubscription(response.data.subscription);
+        }
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          setSubscription(null);
+        }
+      });
+  }, [navigate]);
 
   return (
     <div className="flex flex-row mt-10 gap-4">
@@ -122,75 +162,77 @@ const CreateJobApplication = () => {
             className="bg-gray-50  border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
           />
           <input
-  type="text"
-  placeholder="Wage (e.g. $1500/month)"
-  value={wage}
-  onChange={(e) => setWage(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-/>
+            type="text"
+            placeholder="Wage (e.g. $1500/month)"
+            value={wage}
+            onChange={(e) => setWage(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
 
-<input
-  type="text"
-  placeholder="Location"
-  value={location}
-  onChange={(e) => setLocation(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-/>
+          <input
+            type="text"
+            placeholder="Location"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
 
-<select
-  value={employmentType}
-  onChange={(e) => setEmploymentType(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
->
-  <option value="Full-time">Full-time</option>
-  <option value="Part-time">Part-time</option>
-  <option value="Contract">Contract</option>
-  <option value="Internship">Internship</option>
-</select>
-
-<select
-  value={experienceLevel}
-  onChange={(e) => setExperienceLevel(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
->
-  <option value="Entry-level">Entry-level</option>
-  <option value="Mid-level">Mid-level</option>
-  <option value="Senior-level">Senior-level</option>
-</select>
-
-<input
-  type="text"
-  placeholder="Hashtags (comma separated)"
-  value={hashtags}
-  onChange={(e) => setHashtags(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-/>
-
-<input
-  type="text"
-  placeholder="Benefits (comma separated)"
-  value={benefits}
-  onChange={(e) => setBenefits(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-/>
-
-<input
-  type="date"
-  value={deadline}
-  onChange={(e) => setDeadline(e.target.value)}
-  className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-/>
-
-        </div>
-
-        <div>
-          <button
-            onClick={() => setShowQuestionForm(true)}
-            className="bg-green-600 text-white px-6 mt-3 py-3 rounded-lg shadow hover:bg-green-700 transition-all"
+          <select
+            value={employmentType}
+            onChange={(e) => setEmploymentType(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
           >
-            Add Custom Question
-          </button>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Contract">Contract</option>
+            <option value="Internship">Internship</option>
+          </select>
+
+          <select
+            value={experienceLevel}
+            onChange={(e) => setExperienceLevel(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          >
+            <option value="Entry-level">Entry-level</option>
+            <option value="Mid-level">Mid-level</option>
+            <option value="Senior-level">Senior-level</option>
+          </select>
+
+          <input
+            type="text"
+            placeholder="Hashtags (comma separated)"
+            value={hashtags}
+            onChange={(e) => setHashtags(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
+
+          <input
+            type="text"
+            placeholder="Benefits (comma separated)"
+            value={benefits}
+            onChange={(e) => setBenefits(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
+
+          <input
+            type="date"
+            value={deadline}
+            onChange={(e) => setDeadline(e.target.value)}
+            className="bg-gray-50 border-gray-300 border-2 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          />
         </div>
+        <div>
+      <button
+        onClick={handleButtonClick}
+        className={`px-6 mt-3 py-3 rounded-lg shadow transition-all ${
+          subscription === null
+            ? 'bg-gray-500 text-gray-300 cursor-not-allowed hover:shadow-yellow-500'
+            : 'bg-green-600 text-white hover:bg-green-700 hover:shadow-yellow-500'
+        }`}
+      >
+        Add Custom Question
+      </button>
+    </div>
 
         {showQuestionForm && (
           <div className="p-6 mt-6 bg-gray-100 rounded-lg shadow-sm">
@@ -279,7 +321,7 @@ const CreateJobApplication = () => {
             </button>
           </div>
         ))}
-        
+
         <button
           onClick={handleSubmit}
           className="bg-purple-700 text-white px-6 py-3 rounded-lg shadow hover:bg-purple-800 transition-all"

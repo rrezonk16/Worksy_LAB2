@@ -4,6 +4,8 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import Navbar from "../Navigation/Navbar";
 import Footer from "../Navigation/Footer";
 import gsap from "gsap";
+import { useLocation } from "react-router-dom"; // Add this at the top
+import { FaLinkedinIn, FaFacebookF, FaTwitter } from "react-icons/fa";
 
 const JobListingsById = () => {
   const { id } = useParams();
@@ -12,7 +14,8 @@ const JobListingsById = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const loadingRef = useRef();
-
+  const location = useLocation();
+  const currentUrl = `${window.location.origin}${location.pathname}`;
   useEffect(() => {
     const fetchJob = async () => {
       try {
@@ -75,10 +78,13 @@ const JobListingsById = () => {
       navigate("/my-applications");
     } catch (error) {
       console.error("Failed to apply:", error);
+      
       alert(
         error.response?.data?.message ||
           "Something went wrong. Please try again."
       );
+      navigate("/my-applications");
+
     } finally {
       gsap.to(loadingRef.current, {
         autoAlpha: 0,
@@ -215,7 +221,43 @@ const JobListingsById = () => {
               )}
             </div>
           </div>
-
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold mb-2 text-gray-700">
+              Share this job
+            </h3>
+            <div className="flex gap-4">
+              <a
+                href={`https://www.linkedin.com/shareArticle?url=${encodeURIComponent(
+                  `https://88c5-84-22-48-194.ngrok-free.app/share/job/${id}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-800 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+              >
+                <FaLinkedinIn size={20} /> Share on LinkedIn
+              </a>
+              <a
+                href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                  `https://88c5-84-22-48-194.ngrok-free.app/share/job/${id}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+              >
+                <FaFacebookF size={20} /> Share on Facebook
+              </a>
+              <a
+                href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(
+                  `https://88c5-84-22-48-194.ngrok-free.app/share/job/${id}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-sky-500 text-white px-6 py-3 rounded-lg hover:bg-sky-600 hover:shadow-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2"
+              >
+                <FaTwitter size={20} /> Share on Twitter
+              </a>
+            </div>
+          </div>
           <div className="mt-14">
             <h2 className="text-2xl font-semibold mb-4 text-gray-800">
               Application Questions

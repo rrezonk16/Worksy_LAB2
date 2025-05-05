@@ -105,6 +105,23 @@ public function publicIndex(Request $request)
         ]);
     }
 
+    public function premiumPublicJobs()
+    {
+        $jobs = Job::with([
+            'questions.options',
+            'company',
+            'details'
+        ])
+        ->inRandomOrder()
+        ->take(3)
+        ->get();
+    
+        return response()->json([
+            'data' => $jobs
+        ]);
+    }
+    
+
     public function index(Request $request)
     {
         $companyUser = auth()->user();
@@ -233,5 +250,12 @@ public function publicIndex(Request $request)
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    public function shareJob($id)
+    {
+        $job = Job::with('company', 'details', 'questions')->findOrFail($id);
+
+        // Pass job data to the view
+        return view('share.job', compact('job'));
     }
 }

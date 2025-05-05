@@ -11,8 +11,13 @@ return new class extends Migration {
             $table->string('name');
             $table->string('nui'); // Unique number (NUI)
             $table->string('phone_number');
-            $table->string('email')->unique(); ;
-            $table->json('njesite')->nullable();;
+            $table->string('email')->unique();
+            $table->string("number_of_employees")->nullable();
+            $table->string('city')->nullable();
+            $table->string('country')->nullable();
+            $table->string('address')->nullable();
+            $table->string('logo_url')->nullable();
+            $table->json('njesite')->nullable();
             $table->json('activities')->nullable();
             $table->timestamps();
         });

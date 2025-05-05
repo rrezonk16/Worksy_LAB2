@@ -3,6 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import logo_icon from "../../../assets/logo_icon.png";
 import UsersComponent from "./UsersComponent";
 import VerifyCompanies from "./VerifyCompanies";
+import CompanyManagement from "./CompaniesTable";
+import LogsDownload from "./LogsDownload";
+import AccessDenied from "./AccessDenied";
 
 const AdminInternalPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -11,7 +14,8 @@ const AdminInternalPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
+    const storedPermissions =
+      JSON.parse(localStorage.getItem("permissions")) || [];
     setPermissions(storedPermissions);
   }, []);
 
@@ -28,9 +32,49 @@ const AdminInternalPanel = () => {
   const renderComponent = () => {
     switch (getActiveTab()) {
       case "users":
-        return permissions.includes("READ_USERS") ? <div className="mt-13"><UsersComponent/></div> : <div>Access Denied</div>;
+        return permissions.includes("READ_USERS") ? (
+          <div className="mt-13">
+            <UsersComponent />
+          </div>
+        ) : (
+          <div>Access Denied</div>
+        );
       case "verify-companies":
-        return permissions.includes("EDIT_USERS") ? <div><VerifyCompanies/></div> : <div>Access Denied</div>;
+        return permissions.includes("VERIFY_COMPANY") ? (
+          <div>
+            <VerifyCompanies />
+          </div>
+        ) : (
+          <div>Access Denied</div>
+        );
+      case "manage-companies":
+        return permissions.includes("UPDATE_COMPANY") ? (
+          <div>
+            <CompanyManagement />
+          </div>
+        ) : (
+          <div>Access Denied</div>
+        );
+        case "download-logs":
+          return permissions.includes("READ_LOGS") ? (
+            <div>
+              <LogsDownload />
+            </div>
+          ) : (
+            <div>Access Denied</div>
+          );
+      case "manage-roles":
+        return permissions.includes("READ_ROLES") ? (
+          <div>
+            <h1 className="text-2xl font-bold">Manage Roles</h1>
+            <p>Manage roles and permissions here.</p>
+          </div>
+        ) : (
+          <div>
+            <AccessDenied />
+          </div>
+        );
+
       default:
         return <div>Dashboard</div>;
     }
@@ -69,25 +113,55 @@ const AdminInternalPanel = () => {
             <li>
               <button
                 onClick={() => navigate("?active-tab=users")}
-                className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+                className=" cursor-pointer block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
               >
                 Users
               </button>
             </li>
           )}
-          {permissions.includes("EDIT_USERS") && (
+          {permissions.includes("VERIFY_COMPANY") && (
             <li>
               <button
                 onClick={() => navigate("?active-tab=verify-companies")}
-                className="w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200 flex justify-between"
+                className=" cursor-pointer w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200 flex justify-between"
               >
-                Verify Companies <span className="ml-2 text-sm bg-green-500 text-white px-2 py-1 rounded-full">3</span>
+                Verify Companies
+              </button>
+            </li>
+          )}
+          {permissions.includes("UPDATE_COMPANY") && (
+            <li>
+              <button
+                onClick={() => navigate("?active-tab=manage-companies")}
+                className=" cursor-pointer w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200 flex justify-between"
+              >
+                Manage Companies
+              </button>
+            </li>
+          )}
+          {permissions.includes("READ_LOGS") && (
+            <li>
+              <button
+                onClick={() => navigate("?active-tab=download-logs")}
+                className=" cursor-pointer block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+              >
+                Download Logs
+              </button>
+            </li>
+          )}
+           {permissions.includes("READ_ROLES") && (
+            <li>
+              <button
+                onClick={() => navigate("?active-tab=manage-roles")}
+                className=" cursor-pointer block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+              >
+                Manage Roles
               </button>
             </li>
           )}
           <li>
-            <button 
-              onClick={handleLogout} 
+            <button
+              onClick={handleLogout}
               className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-red-300 bg-red-200"
             >
               Log Out
