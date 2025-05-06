@@ -23,6 +23,9 @@ use App\Http\Controllers\JobApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserDetailController;
+use App\Http\Controllers\PastJobController;
+
+
 
 //Open routes i vendos ketu
 Route::post('register/user', [UserController::class, 'register']);
@@ -36,6 +39,8 @@ Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 Route::get('/api/jobs/{id}', [JobController::class, 'show']);
+Route::get('user/{userId}/past-jobs', [PastJobController::class, 'getByUserId']);
+
 
 //Protected routes i vendos ketu
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -47,10 +52,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('users/{id}', [UserController::class, 'softDeleteUser'])->middleware('permission:DELETE_USERS');
 
     Route::prefix('companies')->group(function () {
-        Route::get('/', [CompanyController::class, 'index']);               // Get all companies
-        Route::get('/{id}', [CompanyController::class, 'show']);            // Get single company with details
-        Route::put('/{id}', [CompanyController::class, 'update']);          // Update company and its details
-        Route::delete('/{id}', [CompanyController::class, 'destroy']);      // Delete company
+        Route::get('/', [CompanyController::class, 'index']);             
+        Route::get('/{id}', [CompanyController::class, 'show']);            
+        Route::put('/{id}', [CompanyController::class, 'update']);      
+        Route::delete('/{id}', [CompanyController::class, 'destroy']); 
     });
     Route::get('/download-logs', [\App\Http\Controllers\ApiLogController::class, 'downloadLogs']);
     Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);
@@ -71,6 +76,13 @@ Route::middleware('auth:sanctum')->post('/company/logo', [CompanyController::cla
 Route::middleware('auth:sanctum')->get('/me', [UserController::class, 'getMyDetails']);
 Route::middleware('auth:sanctum')->post('/subscribe-premium', [SubscriptionController::class, 'store']);
 Route::middleware('auth:sanctum')->get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
+Route::middleware('auth:sanctum')->post('/user/update-profile', [UserDetailController::class, 'updateProfileAndDetails']);
 
-
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('past-jobs', [PastJobController::class, 'index']); 
+    Route::post('past-jobs', [PastJobController::class, 'store']); 
+    Route::get('past-jobs/{id}', [PastJobController::class, 'show']); 
+    Route::put('past-jobs/{id}', [PastJobController::class, 'update']); 
+    Route::delete('past-jobs/{id}', [PastJobController::class, 'destroy']); 
+});
 

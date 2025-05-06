@@ -28,6 +28,7 @@ import Rejected from "./Components/Admin/Company/Rejected";
 import WelcomeCompany from "./Components/Employers/WelcomeCompany";
 import SubscribePage from "./Components/Premium/SubscribePage";
 import ApplicationsDetails from "./Components/Jobs/ApplicationsDetails";
+import MakeCV from "./Components/Admin/User/MakeCV";
 
 const routes = [
   {
@@ -105,6 +106,10 @@ const routes = [
   {
     path: "/my-applications/:id",
     element: <ApplicationsDetails />,
+  },
+  {
+    path: "/cv-maker",
+    element: <MakeCV />,
   },
   {
     path: "/*",

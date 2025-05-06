@@ -27,7 +27,7 @@ const Checkout = () => {
     const paymentData = {
       ClientOrderId: orderId,
       Amount: amount,
-      CallbackUrl: "https://your-api.com/api/payment-callback", // ← Update this
+      CallbackUrl: "https://your-api.com/api/payment-callback",//Ketu shtohet API per te marre statusin e pageses por jo lokalisht
       RedirectUrl: `http://localhost:5173/success?order=${orderId}`,
     };
 

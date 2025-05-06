@@ -69,6 +69,18 @@ class PermissionSeeder extends Seeder
             'MANAGE_BANNED_USERS',
             'OVERRIDE_DECISIONS',
             'VIEW_ALL_TRANSACTIONS',
+
+            //LOGS
+            'READ_LOGS',
+            'DELETE_LOGS',
+            'EXPORT_LOGS',
+            'IMPORT_LOGS',
+            'ARCHIVE_LOGS',
+            'SEARCH_LOGS',
+            'FILTER_LOGS',
+            'ANALYZE_LOGS',
+            'VIEW_LOG_DETAILS',
+            'MANAGE_LOG_SETTINGS',
         ];
 
         foreach ($permissions as $permission) {
