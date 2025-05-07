@@ -11,84 +11,95 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class JobController extends Controller
 {
-public function publicIndex(Request $request)
-{
-    $query = Job::with([
-        'questions.options',
-        'company',
-        'details'
-    ]);
 
-    // Filtering
-    if ($request->filled('name')) {
-        $query->where('title', 'like', '%' . $request->name . '%');
-    }
-
-    if ($request->filled('tag')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('tag', 'like', '%' . $request->tag . '%');
-        });
-    }
-
-    if ($request->filled('city')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('location', 'like', '%' . $request->city . '%');
-        });
-    }
+    public function publicIndex(Request $request)
+    {
+        $cacheKey = 'public_jobs_' . md5(json_encode($request->all()));
+        $cacheTime = 600;
     
-    if ($request->filled('max_wage')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('wage', '<=', $request->max_wage);
-        });
-    }
-    if ($request->filled('min_wage')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('wage', '>=', $request->min_wage);
-        });
-    }
+        $jobs = Cache::remember($cacheKey, $cacheTime, function () use ($request) {
+            $query = Job::with([
+                'questions.options',
+                'company',
+                'details'
+            ]);
     
-    if ($request->filled('employment_type')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('employment_type', 'like', '%' . $request->employment_type . '%');
+            if ($request->filled('name')) {
+                $query->where('title', 'like', '%' . $request->name . '%');
+            }
+    
+            if ($request->filled('tag')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('tag', 'like', '%' . $request->tag . '%');
+                });
+            }
+    
+            if ($request->filled('city')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('location', 'like', '%' . $request->city . '%');
+                });
+            }
+    
+            if ($request->filled('max_wage')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('wage', '<=', $request->max_wage);
+                });
+            }
+    
+            if ($request->filled('min_wage')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('wage', '>=', $request->min_wage);
+                });
+            }
+    
+            if ($request->filled('employment_type')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('employment_type', 'like', '%' . $request->employment_type . '%');
+                });
+            }
+    
+            if ($request->filled('experience_level')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('experience_level', 'like', '%' . $request->experience_level . '%');
+                });
+            }
+    
+            if ($request->filled('benefits')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->whereJsonContains('benefits', $request->benefits);
+                });
+            }
+            
+            if ($request->filled('hashtags')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->whereJsonContains('hashtags', $request->hashtags);
+                });
+            }
+            if ($request->filled('company_id')) {
+                $query->where('company_id', $request->company_id);
+            }            
+    
+            if ($request->filled('deadline')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('deadline', '>=', $request->deadline);
+                });
+            }
+    
+          
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+            $query->orderBy($sortBy, $sortOrder);
+    
+            $perPage = $request->get('per_page', 10);
+            return $query->paginate($perPage);
         });
+    
+        return response()->json($jobs);
     }
-    if ($request->filled('experience_level')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('experience_level', 'like', '%' . $request->experience_level . '%');
-        });
-    }
-    if ($request->filled('hashtags')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->whereJsonContains('hashtags', $request->hashtags);
-        });
-    }
-    if ($request->filled('benefits')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->whereJsonContains('benefits', $request->benefits);
-        });
-    }
-    if ($request->filled('deadline')) {
-        $query->whereHas('details', function ($q) use ($request) {
-            $q->where('deadline', '>=', $request->deadline);
-        });
-    }
-    if ($request->filled('company_id')) {
-        $query->where('company_id', $request->company_id);
-    }    
-    // Sorting
-    $sortBy = $request->get('sort_by', 'created_at');
-    $sortOrder = $request->get('sort_order', 'desc'); // can be 'asc' or 'desc'
-    $query->orderBy($sortBy, $sortOrder);
-
-    // Pagination
-    $perPage = $request->get('per_page', 20);
-    $jobs = $query->paginate($perPage);
-
-    return response()->json($jobs);
-}
 
     
 

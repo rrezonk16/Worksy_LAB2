@@ -8,8 +8,8 @@ const JobFilterSidebar = ({
   cities,
   wageRange,
   setWageRange,
+  minWageRange,
   setMinWageRange,
-  minWageRange, 
   employmentType,
   setEmploymentType,
   experienceLevel,
@@ -24,7 +24,7 @@ const JobFilterSidebar = ({
   setDeadline,
 }) => {
   return (
-    <div className=" p-4  space-y-6 ">
+    <div className="p-4 space-y-6">
       <div>
         <label className="block text-sm font-medium mb-1">Search by Title</label>
         <input
@@ -63,6 +63,7 @@ const JobFilterSidebar = ({
           className="w-full"
         />
       </div>
+
       <div>
         <label className="block text-sm font-medium mb-1">Min Wage: €{minWageRange}</label>
         <input
@@ -74,65 +75,77 @@ const JobFilterSidebar = ({
           className="w-full"
         />
       </div>
-      {/* <div>
+
+      <div>
         <label className="block text-sm font-medium mb-1">Employment Type</label>
-        <input
-          type="text"
+        <select
           value={employmentType}
           onChange={(e) => setEmploymentType(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
-        />
+        >
+          <option value="">All</option>
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Freelance">Freelance</option>
+        </select>
       </div>
 
       <div>
         <label className="block text-sm font-medium mb-1">Experience Level</label>
-        <input
-          type="text"
+        <select
           value={experienceLevel}
           onChange={(e) => setExperienceLevel(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
-        />
+        >
+          <option value="">All</option>
+          <option value="Entry">Entry</option>
+          <option value="Mid">Mid</option>
+          <option value="Senior">Senior</option>
+        </select>
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Tag</label>
+        <label className="block text-sm font-medium mb-1">Tags</label>
         <input
           type="text"
           value={selectedTag}
           onChange={(e) => setSelectedTag(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
+          placeholder="e.g. JavaScript, React"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Benefits (comma separated)</label>
+        <label className="block text-sm font-medium mb-1">Benefits</label>
         <input
           type="text"
           value={selectedBenefits}
           onChange={(e) => setSelectedBenefits(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
+          placeholder="e.g. Health insurance, Remote work"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Hashtags (comma separated)</label>
+        <label className="block text-sm font-medium mb-1">Hashtags</label>
         <input
           type="text"
           value={selectedHashtags}
           onChange={(e) => setSelectedHashtags(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
+          placeholder="e.g. #React, #WebDev"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1">Deadline (YYYY-MM-DD)</label>
+        <label className="block text-sm font-medium mb-1">Deadline</label>
         <input
           type="date"
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
           className="w-full px-3 py-2 border rounded-md"
         />
-      </div> */}
+      </div>
     </div>
   );
 };

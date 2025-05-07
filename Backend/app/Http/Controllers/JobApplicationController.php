@@ -23,7 +23,9 @@ class JobApplicationController extends Controller
             ->get()
             ->map(function ($application) {
                 return [
-                    'application_id' => $application->id, // Include application ID
+                    'application_id' => $application->id,
+                    'status' => $application->status,
+
                     'job' => [
                         'id' => $application->job->id,
                         'title' => $application->job->title,
@@ -74,6 +76,8 @@ class JobApplicationController extends Controller
         return response()->json([
             'application' => [
                 'application_id' => $application->id,
+                'status' => $application->status,
+
                 'job' => [
                     ...$application->job->toArray(), // includes title, description, etc.
                     'company' => $application->job->company->toArray(),
@@ -97,10 +101,12 @@ class JobApplicationController extends Controller
                     'id' => $application->user->id,
                     'name' => $application->user->name,
                     'email' => $application->user->email,
+                    
                 ],
                 'answers' => $application->answers->map(function ($answer) {
                     return [
                         'id' => $answer->id,
+                        
                         'job_question_id' => $answer->job_question_id,
                         'question_text' => $answer->question ? $answer->question->question_text : null,
                         'answer' => $answer->answer,
@@ -109,7 +115,40 @@ class JobApplicationController extends Controller
             ]
         ]);
     }
-    
+    public function getAllApplicationsByJobId($jobId)
+{
+    $applications = JobApplication::with([
+        'user',
+        'answers.question',
+        'job.company'
+    ])
+    ->where('job_id', $jobId)
+    ->get()
+    ->map(function ($application) {
+        return [
+            'application_id' => $application->id,
+            'status' => $application->status,
+            'user' => [
+                'id' => $application->user->id,
+                'name' => $application->user->name,
+                'email' => $application->user->email,
+            ],
+            'answers' => $application->answers->map(function ($answer) {
+                return [
+                    'question_text' => $answer->question?->question_text,
+                    'answer' => $answer->answer
+                ];
+            }),
+            'job' => [
+                'title' => $application->job->title,
+                'company' => $application->job->company->name
+            ]
+        ];
+    });
+
+    return response()->json(['applications' => $applications]);
+}
+
 
     public function apply(Request $request)
     {
