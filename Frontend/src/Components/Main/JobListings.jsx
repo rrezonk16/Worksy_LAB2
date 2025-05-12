@@ -265,14 +265,15 @@ const JobListings = () => {
               ))}
             </div>
           )}
-          <Pagination
+       
+        </div>
+      </div>
+      <div className="mb-8 flex justify-center">
+   <Pagination
             currentPage={currentPage}
             lastPage={lastPage}
             setCurrentPage={setCurrentPage}
-          />
-        </div>
-      </div>
-
+          /></div>
       <Footer />
     </div>
   );

@@ -54,14 +54,16 @@ class PermissionSeeder extends Seeder
             'DELETE_MESSAGES',
             'MANAGE_NOTIFICATIONS',
 
-            // Subscription & Payments
             'MANAGE_SUBSCRIPTIONS',
             'PROCESS_PAYMENTS',
             'VIEW_BILLING_HISTORY',
 
-            // Admin-Specific
             'ACCESS_DASHBOARD',
             'MANAGE_ROLES',
+            'READ_ROLES',
+            'EDIT_ROLES',
+            'ADD_ROLES',
+            'DELETE_ROLES',
             'VIEW_REPORTS',
             'MANAGE_PERMISSIONS',
             'MANAGE_SETTINGS',
@@ -81,6 +83,8 @@ class PermissionSeeder extends Seeder
             'ANALYZE_LOGS',
             'VIEW_LOG_DETAILS',
             'MANAGE_LOG_SETTINGS',
+
+            
         ];
 
         foreach ($permissions as $permission) {

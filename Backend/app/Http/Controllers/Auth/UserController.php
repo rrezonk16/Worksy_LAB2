@@ -33,7 +33,7 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $roleId = 3; // Job Seeker
+        $roleId = 2; // Job Seeker role id per perdoruesit e rinj
 
         $user = User::create([
             'name' => $request->name,

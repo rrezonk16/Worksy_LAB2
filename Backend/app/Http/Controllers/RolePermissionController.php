@@ -9,69 +9,68 @@ use Illuminate\Http\Request;
 
 class RolePermissionController extends Controller
 {
-    // Create a permission
-    public function createPermission(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|string|unique:permissions,name',
-        ]);
 
-        $permission = Permission::create([
-            'name' => $request->name,
-        ]);
-
-        return response()->json([
-            'message' => 'Permission created successfully',
-            'data' => $permission,
-        ], 201);
-    }
-
-    // Create a role
     public function createRole(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|unique:roles,name',
-        ]);
-
-        $role = Role::create([
-            'name' => $request->name,
-        ]);
-
-        return response()->json([
-            'message' => 'Role created successfully',
-            'data' => $role,
-        ], 201);
+        $request->validate(['name' => 'required|string|unique:roles,name']);
+        $role = Role::create(['name' => $request->name]);
+        return response()->json(['message' => 'Role created', 'role' => $role]);
     }
-
-    // Assign permission to a role
-    public function assignPermissionToRole(Request $request, $roleId)
+    public function assignPermissionsToRole(Request $request, $roleId)
     {
-        $request->validate([
-            'permission_ids' => 'required|array',
-            'permission_ids.*' => 'exists:permissions,id',
-        ]);
-
+        $request->validate(['permission_ids' => 'required|array']);
         $role = Role::findOrFail($roleId);
-
         $role->syncPermissions($request->permission_ids);
-
-        return response()->json([
-            'message' => 'Permissions assigned successfully to the role',
-        ]);
+        return response()->json(['message' => 'Permissions updated']);
     }
-
+    public function getPermissionsForRole($roleId)
+    {
+        $role = Role::findOrFail($roleId);
+        return response()->json(['permissions' => $role->permissions]);
+    }
+    public function getUserRole($userId)
+    {
+        $user = User::findOrFail($userId);
+        return response()->json(['role' => $user->roles->first()]);
+    }
     public function assignRoleToUser(Request $request, $userId)
     {
         $request->validate([
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => 'required|exists:roles,id'
         ]);
-
+    
         $user = User::findOrFail($userId);
-
-        $user->roles()->sync([$request->role_id]);
-
-        return response()->json([
-            'message' => 'Role assigned successfully to the user',
-        ]);
+        $user->role_id = $request->role_id;
+        $user->save();
+    
+        return response()->json(['message' => 'Role assigned']);
     }
+    
+
+    public function getPermissions()
+    {
+        $permissions = Permission::all();
+
+        return response()->json(['permissions' => $permissions]);
+    }
+    public function getRoles()
+    {
+        $roles = Role::all();
+        return response()->json(['roles' => $roles]);
+    }
+public function getMyPermissions()
+{
+    $user = auth()->user();
+
+    if (!$user || !$user->role) {
+        return response()->json(['message' => 'No role assigned or unauthenticated.'], 403);
+    }
+
+    $permissions = $user->role->permissions->pluck('name');
+
+    return response()->json([
+        'permissions' => $permissions
+    ]);
+}
+
 }

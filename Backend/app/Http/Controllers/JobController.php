@@ -94,7 +94,7 @@ class JobController extends Controller
             $sortOrder = $request->get('sort_order', 'desc');
             $query->orderBy($sortBy, $sortOrder);
     
-            $perPage = $request->get('per_page', 10);
+            $perPage = $request->get('per_page', 12);
             return $query->paginate($perPage);
         });
     
@@ -154,114 +154,121 @@ class JobController extends Controller
             'jobs' => $jobs
         ]);
     }
+public function store(Request $request)
+{
+    $companyUser = auth()->user();
 
-    public function store(Request $request)
-    {
-        $companyUser = auth()->user();
+    if (!$companyUser || !$companyUser->company_id) {
+        return response()->json(['message' => 'Unauthorized or invalid company user.'], 403);
+    }
 
-        if (!$companyUser || !$companyUser->company_id) {
-            return response()->json(['message' => 'Unauthorized or invalid company user.'], 403);
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'questions' => 'nullable|string',
+        'attachment' => 'nullable|file|max:20480',
+
+        // Job detail fields
+        'wage' => 'nullable|string',
+        'location' => 'nullable|string',
+        'employment_type' => 'nullable|string',
+        'experience_level' => 'nullable|string',
+        'hashtags' => 'nullable|array',
+        'hashtags.*' => 'string',
+        'benefits' => 'nullable|array',
+        'benefits.*' => 'string',
+        'deadline' => 'nullable|date',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $questions = [];
+        if (!empty($validated['questions'])) {
+            $questions = json_decode($validated['questions'], true);
+
+            if (!is_array($questions)) {
+                return response()->json(['message' => 'Invalid questions format. Must be a valid JSON array.'], 422);
+            }
         }
 
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'questions' => 'nullable|string',
-            'attachment' => 'nullable|file|max:20480',
+        $filePath = null;
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $filename = \Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('job_attachments', $filename, 'public');
+        }
 
-            // Job detail fields
-            'wage' => 'nullable|string',
-            'location' => 'nullable|string',
-            'employment_type' => 'nullable|string',
-            'experience_level' => 'nullable|string',
-            'hashtags' => 'nullable|array',
-            'hashtags.*' => 'string',
-            'benefits' => 'nullable|array',
-            'benefits.*' => 'string',
-            'deadline' => 'nullable|date',
+        $job = Job::create([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'company_id' => $companyUser->company_id,
         ]);
 
-        try {
-            DB::beginTransaction();
+        JobDetail::create([
+            'job_id' => $job->id,
+            'wage' => $validated['wage'] ?? null,
+            'location' => $validated['location'] ?? null,
+            'employment_type' => $validated['employment_type'] ?? null,
+            'experience_level' => $validated['experience_level'] ?? null,
+            'hashtags' => $validated['hashtags'] ?? [],
+            'benefits' => $validated['benefits'] ?? [],
+            'deadline' => $validated['deadline'] ?? null,
+        ]);
 
-            $questions = [];
-            if (!empty($validated['questions'])) {
-                $questions = json_decode($validated['questions'], true);
+        // ✅ Create custom questions
+        $allowedInputTypes = ['text', 'yesno', 'file', 'select'];
 
-                if (!is_array($questions)) {
-                    return response()->json(['message' => 'Invalid questions format. Must be a valid JSON array.'], 422);
-                }
+        foreach ($questions as $q) {
+            if (
+                empty($q['question_text']) ||
+                empty($q['input_type']) ||
+                !isset($q['is_required'])
+            ) {
+                DB::rollBack();
+                return response()->json(['message' => 'Each question must include question_text, input_type, and is_required.'], 422);
             }
 
-            $filePath = null;
-            if ($request->hasFile('attachment')) {
-                $file = $request->file('attachment');
-                $filename = \Str::uuid() . '.' . $file->getClientOriginalExtension();
-                $filePath = $file->storeAs('job_attachments', $filename, 'public');
+            if (!in_array($q['input_type'], $allowedInputTypes)) {
+                DB::rollBack();
+                return response()->json(['message' => 'Invalid input type: ' . $q['input_type']], 422);
             }
 
-            $job = Job::create([
-                'title' => $validated['title'],
-                'description' => $validated['description'] ?? null,
-                'company_id' => $companyUser->company_id,
+            $question = JobQuestion::create([
+                'job_id' => $job->id,
+                'question_text' => $q['question_text'],
+                'input_type' => $q['input_type'],
+                'is_required' => $q['is_required'],
             ]);
 
-            JobDetail::create([
-                'job_id' => $job->id,
-                'wage' => $validated['wage'] ?? null,
-                'location' => $validated['location'] ?? null,
-                'employment_type' => $validated['employment_type'] ?? null,
-                'experience_level' => $validated['experience_level'] ?? null,
-                'hashtags' => $validated['hashtags'] ?? [],
-                'benefits' => $validated['benefits'] ?? [],
-                'deadline' => $validated['deadline'] ?? null,
-            ]);
-
-            // ✅ Create questions
-            foreach ($questions as $q) {
-                if (
-                    empty($q['question_text']) ||
-                    empty($q['input_type']) ||
-                    !isset($q['is_required'])
-                ) {
-                    DB::rollBack();
-                    return response()->json(['message' => 'Each question must include question_text, input_type, and is_required.'], 422);
-                }
-
-                $question = JobQuestion::create([
-                    'job_id' => $job->id,
-                    'question_text' => $q['question_text'],
-                    'input_type' => $q['input_type'],
-                    'is_required' => $q['is_required'],
-                ]);
-
-                if ($q['input_type'] === 'select' && !empty($q['options']) && is_array($q['options'])) {
-                    foreach ($q['options'] as $optionText) {
-                        JobQuestionOption::create([
-                            'job_question_id' => $question->id,
-                            'option_text' => $optionText,
-                        ]);
-                    }
+            if ($q['input_type'] === 'select' && !empty($q['options']) && is_array($q['options'])) {
+                foreach ($q['options'] as $optionText) {
+                    JobQuestionOption::create([
+                        'job_question_id' => $question->id,
+                        'option_text' => $optionText,
+                    ]);
                 }
             }
-
-            DB::commit();
-
-            return response()->json([
-                'message' => 'Job created successfully.',
-                'job_id' => $job->id,
-                'attachment_url' => $filePath ? asset('storage/' . $filePath) : null,
-            ], 201);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Job creation failed: ' . $e->getMessage());
-            return response()->json([
-                'message' => 'An error occurred while creating the job.',
-                'error' => $e->getMessage()
-            ], 500);
         }
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Job created successfully.',
+            'job_id' => $job->id,
+            'attachment_url' => $filePath ? asset('storage/' . $filePath) : null,
+        ], 201);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Job creation failed: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'An error occurred while creating the job.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
     public function shareJob($id)
     {
         $job = Job::with('company', 'details', 'questions')->findOrFail($id);

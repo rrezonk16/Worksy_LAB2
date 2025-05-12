@@ -6,17 +6,35 @@ import VerifyCompanies from "./VerifyCompanies";
 import CompanyManagement from "./CompaniesTable";
 import LogsDownload from "./LogsDownload";
 import AccessDenied from "./AccessDenied";
+import RolePermissionManager from "./RolePermissionManager";
+import UserRoleManager from "./UserRoleManager";
+import axios from "axios";
+import IconLoading from "../../Loaders/IconLoading";
 
 const AdminInternalPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [permissions, setPermissions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedPermissions =
-      JSON.parse(localStorage.getItem("permissions")) || [];
-    setPermissions(storedPermissions);
+    axios
+      .get("http://localhost:8000/api/get-my-permissions", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      })
+      .then((response) => {
+        setPermissions(response.data.permissions);
+        localStorage.setItem("permissions", JSON.stringify(response.data.permissions));
+      })
+      .catch((error) => {
+        console.error("Failed to fetch permissions:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }, []);
 
   const getActiveTab = () => {
@@ -32,53 +50,31 @@ const AdminInternalPanel = () => {
   const renderComponent = () => {
     switch (getActiveTab()) {
       case "users":
-        return permissions.includes("READ_USERS") ? (
-          <div className="mt-13">
-            <UsersComponent />
-          </div>
-        ) : (
-          <div>Access Denied</div>
-        );
+        return permissions.includes("READ_USERS") ? <UsersComponent /> : <AccessDenied />;
       case "verify-companies":
-        return permissions.includes("VERIFY_COMPANY") ? (
-          <div>
-            <VerifyCompanies />
-          </div>
-        ) : (
-          <div>Access Denied</div>
-        );
+        return permissions.includes("VERIFY_COMPANY") ? <VerifyCompanies /> : <AccessDenied />;
       case "manage-companies":
-        return permissions.includes("UPDATE_COMPANY") ? (
-          <div>
-            <CompanyManagement />
-          </div>
+        return permissions.includes("UPDATE_COMPANY") ? <CompanyManagement /> : <AccessDenied />;
+      case "download-logs":
+        return permissions.includes("READ_LOGS") ? (
+            <LogsDownload />
         ) : (
-          <div>Access Denied</div>
+          <AccessDenied />
         );
-        case "download-logs":
-          return permissions.includes("READ_LOGS") ? (
-            <div>
-              <LogsDownload />
-            </div>
-          ) : (
-            <div>Access Denied</div>
-          );
+      case "roles":
+        return permissions.includes("READ_ROLES") ? <RolePermissionManager /> : <AccessDenied />;
       case "manage-roles":
-        return permissions.includes("READ_ROLES") ? (
-          <div>
-            <h1 className="text-2xl font-bold">Manage Roles</h1>
-            <p>Manage roles and permissions here.</p>
-          </div>
-        ) : (
-          <div>
-            <AccessDenied />
-          </div>
-        );
-
+        return permissions.includes("READ_ROLES") ? <UserRoleManager /> : <AccessDenied />;
       default:
         return <div>Dashboard</div>;
     }
   };
+
+  if (loading) {
+    return (
+      <IconLoading />
+    );
+  }
 
   return (
     <div className="flex">
@@ -113,7 +109,7 @@ const AdminInternalPanel = () => {
             <li>
               <button
                 onClick={() => navigate("?active-tab=users")}
-                className=" cursor-pointer block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+                className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
               >
                 Users
               </button>
@@ -123,7 +119,7 @@ const AdminInternalPanel = () => {
             <li>
               <button
                 onClick={() => navigate("?active-tab=verify-companies")}
-                className=" cursor-pointer w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200 flex justify-between"
+                className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
               >
                 Verify Companies
               </button>
@@ -133,7 +129,7 @@ const AdminInternalPanel = () => {
             <li>
               <button
                 onClick={() => navigate("?active-tab=manage-companies")}
-                className=" cursor-pointer w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200 flex justify-between"
+                className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
               >
                 Manage Companies
               </button>
@@ -143,21 +139,31 @@ const AdminInternalPanel = () => {
             <li>
               <button
                 onClick={() => navigate("?active-tab=download-logs")}
-                className=" cursor-pointer block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+                className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
               >
                 Download Logs
               </button>
             </li>
           )}
-           {permissions.includes("READ_ROLES") && (
-            <li>
-              <button
-                onClick={() => navigate("?active-tab=manage-roles")}
-                className=" cursor-pointer block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
-              >
-                Manage Roles
-              </button>
-            </li>
+          {permissions.includes("READ_ROLES") && (
+            <>
+              <li>
+                <button
+                  onClick={() => navigate("?active-tab=manage-roles")}
+                  className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+                >
+                  Manage Roles
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => navigate("?active-tab=roles")}
+                  className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+                >
+                  Role Permission Manager
+                </button>
+              </li>
+            </>
           )}
           <li>
             <button
@@ -171,7 +177,7 @@ const AdminInternalPanel = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="ml-64 p-6 w-full">{renderComponent()}</main>
+      <main className="ml-64 p-6 w-full mt-14">{renderComponent()}</main>
     </div>
   );
 };
