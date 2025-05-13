@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('job_id')->constrained()->onDelete('cascade');
             $table->string('question_text');
-            $table->enum('input_type', ['text', 'number', 'yesno', 'select']);
+            $table->enum('input_type', ['text', 'number', 'yesno', 'select', 'file']);
             $table->boolean('is_required')->default(false);
             $table->timestamps();
         });

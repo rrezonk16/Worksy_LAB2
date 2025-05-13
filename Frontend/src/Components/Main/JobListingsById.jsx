@@ -4,7 +4,6 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import Navbar from "../Navigation/Navbar";
 import Footer from "../Navigation/Footer";
 import gsap from "gsap";
-import { useLocation } from "react-router-dom"; // Add this at the top
 import { FaLinkedinIn, FaFacebookF, FaTwitter } from "react-icons/fa";
 
 const JobListingsById = () => {
@@ -14,8 +13,6 @@ const JobListingsById = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const loadingRef = useRef();
-  const location = useLocation();
-  const currentUrl = `${window.location.origin}${location.pathname}`;
   useEffect(() => {
     const fetchJob = async () => {
       try {
@@ -43,12 +40,12 @@ const JobListingsById = () => {
       return;
     }
 
-    const formattedAnswers = Object.entries(answers).map(
-      ([questionId, answer]) => ({
-        question_id: questionId,
-        answer,
-      })
-    );
+const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => {
+  return {
+    question_id: questionId,
+    answer: answer instanceof File ? answer : answer, 
+  };
+});
 
     setIsSubmitting(true);
     gsap.to(loadingRef.current, {
@@ -57,42 +54,51 @@ const JobListingsById = () => {
       ease: "power2.out",
     });
 
-    try {
-      const response = await axios.post(
-        `http://127.0.0.1:8000/api/job-apply`,
-        {
-          job_id: id,
-          answers: formattedAnswers,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+try {
+  const formData = new FormData();
+  formData.append("job_id", id);
 
-      if (response.status !== 200) {
-        throw new Error("Failed to apply for the job");
-      }
+  formattedAnswers.forEach((answer, index) => {
+    formData.append(`answers[${index}][question_id]`, answer.question_id);
 
-      navigate("/my-applications");
-    } catch (error) {
-      console.error("Failed to apply:", error);
-      
-      alert(
-        error.response?.data?.message ||
-          "Something went wrong. Please try again."
-      );
-      navigate("/my-applications");
-
-    } finally {
-      gsap.to(loadingRef.current, {
-        autoAlpha: 0,
-        duration: 0.5,
-        ease: "power2.out",
-      });
-      setIsSubmitting(false);
+    if (answer.answer instanceof File) {
+      formData.append(`answers[${index}][answer]`, answer.answer);
+    } else {
+      formData.append(`answers[${index}][answer]`, answer.answer);
     }
+  });
+
+  const response = await axios.post(
+    `http://127.0.0.1:8000/api/job-apply`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (response.status !== 200) {
+    throw new Error("Failed to apply for the job");
+  }
+
+  navigate("/my-applications");
+} catch (error) {
+  console.error("Failed to apply:", error);
+  alert(
+    error.response?.data?.message || "Something went wrong. Please try again."
+  );
+  navigate("/my-applications");
+} finally {
+  gsap.to(loadingRef.current, {
+    autoAlpha: 0,
+    duration: 0.5,
+    ease: "power2.out",
+  });
+  setIsSubmitting(false);
+}
+
   };
 
   if (!job) {
@@ -310,6 +316,13 @@ const JobListingsById = () => {
                         </option>
                       ))}
                     </select>
+                  ) : q.input_type === "file" ? (
+                    <input
+                      type="file"
+                      required={q.is_required}
+                      onChange={(e) => handleChange(q.id, e.target.files[0])}
+                      className="w-full border rounded px-3 py-2"
+                    />
                   ) : (
                     <input
                       type="text"

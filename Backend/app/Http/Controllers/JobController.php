@@ -16,6 +16,25 @@ use Illuminate\Support\Facades\Cache;
 class JobController extends Controller
 {
 
+    public function destroy($id)
+{
+    $user = auth()->user();
+    $job = Job::find($id);
+
+    if (!$job) {
+        return response()->json(['message' => 'Job not found'], 404);
+    }
+
+    if ($job->company_id !== $user->company_id) {
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    $job->delete();
+
+    return response()->json(['message' => 'Job deleted successfully']);
+}
+
+
     public function publicIndex(Request $request)
     {
         $cacheKey = 'public_jobs_' . md5(json_encode($request->all()));
@@ -268,6 +287,19 @@ public function store(Request $request)
         ], 500);
     }
 }
+public function show($id)
+{
+    $job = Job::with([
+        'details',
+        'questions.options'
+    ])->find($id);
+
+    if (!$job) {
+        return response()->json(['message' => 'Job not found.'], 404);
+    }
+
+    return response()->json(['job' => $job]);
+}
 
     public function shareJob($id)
     {
@@ -276,4 +308,128 @@ public function store(Request $request)
         // Pass job data to the view
         return view('share.job', compact('job'));
     }
+
+    public function update(Request $request, $id)
+{
+    $companyUser = auth()->user();
+
+    if (!$companyUser || !$companyUser->company_id) {
+        return response()->json(['message' => 'Unauthorized or invalid company user.'], 403);
+    }
+
+    $job = Job::with('details', 'questions')->find($id);
+
+    if (!$job || $job->company_id !== $companyUser->company_id) {
+        return response()->json(['message' => 'Job not found or unauthorized.'], 404);
+    }
+
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'questions' => 'nullable|string',
+        'attachment' => 'nullable|file|max:20480',
+
+        'wage' => 'nullable|string',
+        'location' => 'nullable|string',
+        'employment_type' => 'nullable|string',
+        'experience_level' => 'nullable|string',
+        'hashtags' => 'nullable|array',
+        'hashtags.*' => 'string',
+        'benefits' => 'nullable|array',
+        'benefits.*' => 'string',
+        'deadline' => 'nullable|date',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $questions = [];
+        if (!empty($validated['questions'])) {
+            $questions = json_decode($validated['questions'], true);
+
+            if (!is_array($questions)) {
+                return response()->json(['message' => 'Invalid questions format. Must be a valid JSON array.'], 422);
+            }
+        }
+
+        $filePath = $job->attachment;
+        if ($request->hasFile('attachment')) {
+            $file = $request->file('attachment');
+            $filename = \Str::uuid() . '.' . $file->getClientOriginalExtension();
+            $filePath = $file->storeAs('job_attachments', $filename, 'public');
+        }
+
+        $job->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'attachment' => $filePath,
+        ]);
+
+        $job->details->update([
+            'wage' => $validated['wage'] ?? null,
+            'location' => $validated['location'] ?? null,
+            'employment_type' => $validated['employment_type'] ?? null,
+            'experience_level' => $validated['experience_level'] ?? null,
+            'hashtags' => $validated['hashtags'] ?? [],
+            'benefits' => $validated['benefits'] ?? [],
+            'deadline' => $validated['deadline'] ?? null,
+        ]);
+
+        foreach ($job->questions as $question) {
+            $question->options()->delete();
+            $question->delete();
+        }
+
+        // ✅ Create new questions
+        $allowedInputTypes = ['text', 'yesno', 'file', 'select'];
+
+        foreach ($questions as $q) {
+            if (
+                empty($q['question_text']) ||
+                empty($q['input_type']) ||
+                !isset($q['is_required'])
+            ) {
+                DB::rollBack();
+                return response()->json(['message' => 'Each question must include question_text, input_type, and is_required.'], 422);
+            }
+
+            if (!in_array($q['input_type'], $allowedInputTypes)) {
+                DB::rollBack();
+                return response()->json(['message' => 'Invalid input type: ' . $q['input_type']], 422);
+            }
+
+            $newQuestion = JobQuestion::create([
+                'job_id' => $job->id,
+                'question_text' => $q['question_text'],
+                'input_type' => $q['input_type'],
+                'is_required' => $q['is_required'],
+            ]);
+
+            if ($q['input_type'] === 'select' && !empty($q['options']) && is_array($q['options'])) {
+                foreach ($q['options'] as $optionText) {
+                    JobQuestionOption::create([
+                        'job_question_id' => $newQuestion->id,
+                        'option_text' => $optionText,
+                    ]);
+                }
+            }
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Job updated successfully.',
+            'attachment_url' => $filePath ? asset('storage/' . $filePath) : null,
+        ]);
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        Log::error('Job update failed: ' . $e->getMessage());
+        return response()->json([
+            'message' => 'An error occurred while updating the job.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }

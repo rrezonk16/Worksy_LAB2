@@ -17,7 +17,7 @@ class JobApplicationController extends Controller
     public function getUserApplications()
     {
         $user = auth()->user();
-    
+
         $applications = $user->jobApplications()
             ->with(['job.company', 'answers.question'])
             ->get()
@@ -48,16 +48,16 @@ class JobApplicationController extends Controller
                     }),
                 ];
             });
-    
+
         return response()->json([
             'jobs' => $applications,
         ]);
     }
-    
+
     public function getApplicationById($applicationId)
     {
         $user = auth()->user();
-    
+
         $application = JobApplication::with([
             'job.company',
             'job.details',
@@ -68,11 +68,11 @@ class JobApplicationController extends Controller
             ->where('id', $applicationId)
             ->where('user_id', $user->id)
             ->first();
-    
+
         if (!$application) {
             return response()->json(['message' => 'Application not found.'], 404);
         }
-    
+
         return response()->json([
             'application' => [
                 'application_id' => $application->id,
@@ -101,12 +101,12 @@ class JobApplicationController extends Controller
                     'id' => $application->user->id,
                     'name' => $application->user->name,
                     'email' => $application->user->email,
-                    
+
                 ],
                 'answers' => $application->answers->map(function ($answer) {
                     return [
                         'id' => $answer->id,
-                        
+
                         'job_question_id' => $answer->job_question_id,
                         'question_text' => $answer->question ? $answer->question->question_text : null,
                         'answer' => $answer->answer,
@@ -116,38 +116,39 @@ class JobApplicationController extends Controller
         ]);
     }
     public function getAllApplicationsByJobId($jobId)
-{
-    $applications = JobApplication::with([
-        'user',
-        'answers.question',
-        'job.company'
-    ])
-    ->where('job_id', $jobId)
-    ->get()
-    ->map(function ($application) {
-        return [
-            'application_id' => $application->id,
-            'status' => $application->status,
-            'user' => [
-                'id' => $application->user->id,
-                'name' => $application->user->name,
-                'email' => $application->user->email,
-            ],
-            'answers' => $application->answers->map(function ($answer) {
+    {
+        $applications = JobApplication::with([
+            'user',
+            'answers.question',
+            'job.company'
+        ])
+            ->where('job_id', $jobId)
+            ->get()
+            ->map(function ($application) {
                 return [
-                    'question_text' => $answer->question?->question_text,
-                    'answer' => $answer->answer
+                    'application_id' => $application->id,
+                    'status' => $application->status,
+                    'user' => [
+                        'id' => $application->user->id,
+                        'name' => $application->user->name,
+                        'email' => $application->user->email,
+                    ],
+                    'answers' => $application->answers->map(function ($answer) {
+                        return [
+                            'question_text' => $answer->question?->question_text,
+                            'answer' => $answer->answer
+                        ];
+                    }),
+                    'job' => [
+                        'title' => $application->job->title,
+                        'company' => $application->job->company->name
+                    ]
                 ];
-            }),
-            'job' => [
-                'title' => $application->job->title,
-                'company' => $application->job->company->name
-            ]
-        ];
-    });
+            });
 
-    return response()->json(['applications' => $applications]);
-}
+        return response()->json(['applications' => $applications]);
+    }
+
 
 
     public function apply(Request $request)
@@ -156,7 +157,7 @@ class JobApplicationController extends Controller
             'job_id' => 'required|exists:jobs,id',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:job_questions,id',
-            'answers.*.answer' => 'required|string'
+            'answers.*.answer' => 'required' // Can be string or file depending on input_type
         ]);
 
         $user = auth()->user();
@@ -169,7 +170,7 @@ class JobApplicationController extends Controller
         if ($alreadyApplied) {
             return response()->json([
                 'message' => 'You have already applied to this job.'
-            ], 409); // 409 Conflict
+            ], 409);
         }
 
         $application = JobApplication::create([
@@ -179,26 +180,43 @@ class JobApplicationController extends Controller
 
         $answerData = [];
 
-        foreach ($request->answers as $ans) {
+        foreach ($request->answers as $index => $ans) {
             $question = JobQuestion::find($ans['question_id']);
+            $inputType = $question->input_type;
+
+            $storedAnswer = '';
+
+            if ($inputType === 'file') {
+                $fileKey = "answers.$index.answer";
+
+                if ($request->hasFile($fileKey)) {
+                    $file = $request->file($fileKey);
+                    $path = $file->store('applications/files', 'public');
+                    $storedAnswer = $path;
+                } else {
+                    continue; // Skip if no file is provided
+                }
+            } else {
+                $storedAnswer = $ans['answer'];
+            }
 
             JobApplicationAnswer::create([
                 'job_application_id' => $application->id,
                 'job_question_id' => $ans['question_id'],
-                'answer' => $ans['answer'],
+                'answer' => $storedAnswer,
             ]);
 
             $answerData[] = [
                 'question' => $question->question_text,
-                'answer' => $ans['answer'],
+                'answer' => $inputType === 'file' ? asset('storage/' . $storedAnswer) : $storedAnswer,
             ];
         }
 
-        Mail::to($user->email)->send(new JobApplicationConfirmationMail($user, $job));
+        Mail::to($user->email)->queue(new JobApplicationConfirmationMail($user, $job));
 
         $companyEmail = $job->company->email ?? null;
         if ($companyEmail) {
-            Mail::to($companyEmail)->send(new JobApplicationSubmitted($job, $user, $answerData));
+            Mail::to($companyEmail)->queue(new JobApplicationSubmitted($job, $user, $answerData));
         }
 
         return response()->json([
@@ -224,4 +242,63 @@ class JobApplicationController extends Controller
             'applications' => $applications
         ]);
     }
+
+
+    public function updateApplication(Request $request, $applicationId)
+{
+    $request->validate([
+        'answers' => 'required|array',
+        'answers.*.question_id' => 'required|exists:job_questions,id',
+        'answers.*.answer' => 'required' // string or file
+    ]);
+
+    $user = auth()->user();
+
+    $application = JobApplication::where('id', $applicationId)
+        ->where('user_id', $user->id)
+        ->first();
+
+    if (!$application) {
+        return response()->json(['message' => 'Application not found.'], 404);
+    }
+
+    // Delete old answers
+    JobApplicationAnswer::where('job_application_id', $application->id)->delete();
+
+    $answerData = [];
+
+    foreach ($request->answers as $index => $ans) {
+        $question = JobQuestion::find($ans['question_id']);
+        $inputType = $question->input_type;
+
+        $storedAnswer = '';
+
+        if ($inputType === 'file') {
+            $fileKey = "answers.$index.answer";
+            if ($request->hasFile($fileKey)) {
+                $file = $request->file($fileKey);
+                $path = $file->store('applications/files', 'public');
+                $storedAnswer = $path;
+            } else {
+                continue;
+            }
+        } else {
+            $storedAnswer = $ans['answer'];
+        }
+
+        JobApplicationAnswer::create([
+            'job_application_id' => $application->id,
+            'job_question_id' => $ans['question_id'],
+            'answer' => $storedAnswer,
+        ]);
+
+        $answerData[] = [
+            'question' => $question->question_text,
+            'answer' => $inputType === 'file' ? asset('storage/' . $storedAnswer) : $storedAnswer,
+        ];
+    }
+
+    return response()->json(['message' => 'Application updated successfully.']);
+}
+
 }

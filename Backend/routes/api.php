@@ -88,12 +88,18 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Job Management
     Route::post('/jobs', [JobController::class, 'store']);
     Route::get('/jobs', [JobController::class, 'index']);
+    Route::get('/jobs/{id}', [JobController::class, 'show']);
+    Route::put('/jobs/{id}', [JobController::class, 'update']);
+    Route::delete('/jobs/{id}', [JobController::class, 'destroy']);
+
 
     // Job Applications
     Route::post('/job-apply', [JobApplicationController::class, 'apply']);
     Route::get('/job-applications/{jobId}', [JobApplicationController::class, 'getApplicationsForJob']);
     Route::get('/my-applications', [JobApplicationController::class, 'getUserApplications']);
     Route::get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
+    Route::put('/job-apply/{applicationId}', [JobApplicationController::class, 'updateApplication']);
+
 
     // Subscription
     Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);
