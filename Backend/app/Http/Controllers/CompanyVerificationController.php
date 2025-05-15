@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CompanyVerification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Company;
+use App\Mail\CompanyVerifiedMail;
+use Illuminate\Support\Facades\Mail;
 
 class CompanyVerificationController extends Controller
 {
@@ -101,18 +104,26 @@ class CompanyVerificationController extends Controller
     }
     
 
-    public function activateVerification($companyId)
-    {
-        $verification = CompanyVerification::where('company_id', $companyId)->first();
 
-        if (!$verification) {
-            return response()->json(['message' => 'Verification record not found.'], 404);
-        }
+public function activateVerification($companyId)
+{
+    $verification = CompanyVerification::where('company_id', $companyId)->first();
 
-        $verification->update(['status' => 'approved']);
-
-        return response()->json(['message' => 'Company verification approved successfully!'], 200);
+    if (!$verification) {
+        return response()->json(['message' => 'Verification record not found.'], 404);
     }
+
+    $verification->update(['status' => 'approved']);
+
+    $company = Company::find($companyId);
+
+    if ($company && $company->email) {
+        Mail::to($company->email)->send(new CompanyVerifiedMail($company));
+    }
+
+    return response()->json(['message' => 'Company verification approved successfully!'], 200);
+}
+
 
     public function refuseVerification($companyId)
     {

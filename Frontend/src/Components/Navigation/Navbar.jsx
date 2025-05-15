@@ -3,11 +3,13 @@ import logo_full from "../../assets/logo_full.png";
 import { useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { gsap } from "gsap";
+import axios from "axios";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hasDashboardAccess, setHasDashboardAccess] = useState(false);
   const menuRef = useRef(null);
 
   const handleLogout = () => {
@@ -36,6 +38,31 @@ const Navbar = () => {
     }
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (!token) return;
+
+    axios
+      .get("http://localhost:8000/api/get-my-permissions", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        const permissions = res.data.permissions || [];
+
+        const hasAccess = permissions.includes("ACCESS_DASHBOARD");
+
+        console.log("Permissions returned:", permissions);
+        console.log("Has Dashboard Access:", hasAccess);
+
+        setHasDashboardAccess(hasAccess);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch permissions:", err);
+        setHasDashboardAccess(false);
+      });
+  }, [token]);
+
   return (
     <header className="flex justify-between items-center p-6 shadow-md relative">
       <div className="flex items-center space-x-2">
@@ -49,26 +76,25 @@ const Navbar = () => {
           <>
             <button
               onClick={() => navigate("/job-listings")}
-              className="text-gray-800 font-medium cursor-pointer  "
+              className="text-gray-800 font-medium cursor-pointer"
             >
               Job Listings
             </button>
             <button
               onClick={() => navigate("/for-employers")}
-              className="text-gray-800 font-medium cursor-pointer  "
+              className="text-gray-800 font-medium cursor-pointer"
             >
               Post Jobs
             </button>
-
             <button
               onClick={() => navigate("/login")}
-              className="px-4  cursor-pointer py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
+              className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
             >
               Login
             </button>
             <button
               onClick={() => navigate("/register")}
-              className="px-4 cursor-pointer  py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
+              className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
             >
               Join now
             </button>
@@ -77,13 +103,13 @@ const Navbar = () => {
           <>
             <button
               onClick={() => navigate("/profile")}
-              className="text-gray-800 font-medium cursor-pointer "
+              className="text-gray-800 font-medium cursor-pointer"
             >
               Profile
             </button>
             <button
               onClick={() => navigate("/my-applications")}
-              className="text-gray-800 font-medium cursor-pointer "
+              className="text-gray-800 font-medium cursor-pointer"
             >
               My Applications
             </button>
@@ -93,9 +119,18 @@ const Navbar = () => {
             >
               View Jobs
             </button>
+            {hasDashboardAccess && (
+              <button
+                onClick={() => navigate("/admin/internal/panel")}
+                className=" font-medium cursor-pointer bg-blue-500 text-white  px-4 py-2 rounded-full hover:bg-blue-600"
+              >
+                
+                Admin Panel 
+              </button>
+            )}
             <button
               onClick={handleLogout}
-              className="px-4 py-2 border cursor-pointer  border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
+              className="px-4 py-2 border border-gray-800 rounded-full hover:bg-gray-800 hover:text-white"
             >
               Logout
             </button>
@@ -166,6 +201,17 @@ const Navbar = () => {
             >
               View Jobs
             </button>
+            {hasDashboardAccess && (
+              <button
+                onClick={() => {
+                  navigate("/admin");
+                  setMenuOpen(false);
+                }}
+                className="w-full text-left"
+              >
+                Admin Panel
+              </button>
+            )}
             <button
               onClick={() => {
                 handleLogout();

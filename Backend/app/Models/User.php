@@ -38,5 +38,9 @@ class User extends Authenticatable
 {
     return $this->hasMany(\App\Models\JobApplication::class, 'user_id');
 }
+public function pastJobs()
+{
+    return $this->hasMany(PastJob::class);
+}
 
 }

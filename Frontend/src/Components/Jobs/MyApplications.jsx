@@ -4,19 +4,18 @@ import Navbar from "../Navigation/Navbar";
 import Footer from "../Navigation/Footer";
 import { gsap } from "gsap";
 import { useNavigate } from "react-router-dom";
-import "../Admin/User/modal.css"
+import "../Admin/User/modal.css";
 
-import "../Admin/User/modal.css"
-import "../Admin/User/modal.css"
-  
+import "../Admin/User/modal.css";
+import "../Admin/User/modal.css";
+
 const MyApplications = () => {
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [openJobs, setOpenJobs] = useState({}); 
+  const [openJobs, setOpenJobs] = useState({});
   const navigate = useNavigate();
 
   const handleNavigate = (applicationId) => {
-    
     navigate(`/my-applications/${applicationId}`);
   };
 
@@ -32,6 +31,7 @@ const MyApplications = () => {
             },
           }
         );
+        console.log("Applications:", response.data);
 
         setJobs(response.data.jobs);
       } catch (error) {
@@ -132,7 +132,19 @@ const MyApplications = () => {
                               "No question text provided"}
                             :
                           </strong>{" "}
-                          {answer.answer}
+                          {typeof answer.answer === "string" &&
+                          answer.answer.startsWith("applications/") ? (
+                            <a
+                              href={`http://localhost:8000/storage/${answer.answer}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="ml-2 inline-block bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 transition"
+                            >
+                              Open File
+                            </a>
+                          ) : (
+                            answer.answer
+                          )}
                         </li>
                       ))}
                     </ul>

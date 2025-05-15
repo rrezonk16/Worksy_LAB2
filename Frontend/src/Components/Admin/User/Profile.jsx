@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Navbar from "../../Navigation/Navbar";
 import Footer from "../../Navigation/Footer";
 import axios from "axios";
-import { Pencil } from "lucide-react";
+import ProfileImageEditor from "./ProfileImageEditor";
+import ProfileModal from "./ProfileModal";
+import ResumeModal from "./ResumeModal";
 import "./modal.css";
+import JobExperiences from "./JobExperinces";
+import { useNavigate } from "react-router-dom";
+import IconLoading from "../../Loaders/IconLoading";
 
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -13,6 +18,7 @@ const Profile = () => {
   const [formData, setFormData] = useState({});
   const [profileImage, setProfileImage] = useState(null);
   const [resumeFile, setResumeFile] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -30,7 +36,15 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (["birthday", "gender", "bio", "skills_tag"].includes(name)) {
+    if (
+      [
+        "birthday",
+        "gender",
+        "bio",
+        "skills_tag",
+        "resume_link_to_file",
+      ].includes(name)
+    ) {
       setFormData((prev) => ({
         ...prev,
         details: {
@@ -47,42 +61,49 @@ const Profile = () => {
   };
 
   const handleUpdate = () => {
-    axios
-      .put("http://127.0.0.1:8000/api/me/update", formData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      })
-      .then((res) => {
-        alert("Profile updated successfully");
-        setUser(res.data.user);
-        setIsEditing(false);
-      })
-      .catch((err) => console.error(err));
-  };
-
-  const handleProfileUpload = () => {
     const data = new FormData();
-    data.append("profile_image", profileImage);
+    data.append("name", formData.name || "");
+    data.append("surname", formData.surname || "");
+    data.append("email", formData.email || "");
+    data.append("phone_number", formData.phone_number || "");
+    data.append("birthday", formData.details?.birthday || "");
+    data.append("gender", formData.details?.gender || "");
+    data.append("bio", formData.details?.bio || "");
+    data.append("skills_tag", formData.details?.skills_tag || "");
+    data.append(
+      "resume_link_to_file",
+      formData.details?.resume_link_to_file || ""
+    );
+    data.append("social_links[]", formData.details?.social_links?.[0] || "");
+    data.append("social_links[]", formData.details?.social_links?.[1] || "");
+
+    if (profileImage) {
+      data.append("profile_image", profileImage);
+    }
 
     axios
-      .post("http://127.0.0.1:8000/api/profile-image", data, {
+      .post("http://127.0.0.1:8000/api/user/update-profile", data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "multipart/form-data",
         },
       })
       .then(() => {
-        alert("Profile image uploaded");
+        alert("Profile updated successfully");
         setShowProfileModal(false);
+        setIsEditing(false);
         window.location.reload();
       })
       .catch((err) => console.error(err));
   };
 
+  const handleProfileUpload = () => {
+    handleUpdate();
+  };
+
   const handleResumeUpload = () => {
     const data = new FormData();
-    data.append("resume", resumeFile);
+    data.append("cv", resumeFile);
 
     axios
       .post("http://127.0.0.1:8000/api/upload-resume", data, {
@@ -99,17 +120,14 @@ const Profile = () => {
       .catch((err) => console.error(err));
   };
 
-  if (!user) return <div className="p-6">Loading...</div>;
+  if (!user)
+    return (
+      <div className="p-6">
+        <IconLoading />
+      </div>
+    );
 
-  const {
-    name,
-    surname,
-    email,
-    phone_number,
-    created_at,
-    details,
-  } = formData;
-
+  const { name, surname, email, phone_number, created_at, details } = formData;
   return (
     <>
       <Navbar />
@@ -117,6 +135,12 @@ const Profile = () => {
         <h2 className="text-3xl font-bold mb-6 text-center">My Profile</h2>
 
         <div className="flex justify-end mb-4 gap-4">
+          <button
+            onClick={navigate.bind(null, "/cv-maker")}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+          >
+            Generate your CV
+          </button>
           {isEditing && (
             <button
               onClick={handleUpdate}
@@ -134,26 +158,35 @@ const Profile = () => {
         </div>
 
         <div className="bg-white shadow-lg rounded-2xl p-6 flex flex-col md:flex-row items-center gap-8">
-          <div className="relative w-40 h-40 group">
-            <img
-              src={
-                user.details?.profile_image || "https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg"
-              }
-              className="rounded-full w-full h-full object-cover border-4 border-gray-300"
+          <ProfileImageEditor
+            imageUrl={
+              user.details?.profile_image ||
+              "https://i.pinimg.com/474x/07/c4/72/07c4720d19a9e9edad9d0e939eca304a.jpg"
+            }
+            onEditClick={() => setShowProfileModal(true)}
+          />
+
+          {showProfileModal && (
+            <ProfileModal
+              onClose={() => setShowProfileModal(false)}
+              onUpload={handleProfileUpload}
+              setFile={setProfileImage}
             />
-            <div
-              className="absolute inset-0 bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 flex items-center justify-center cursor-pointer transition"
-              onClick={() => setShowProfileModal(true)}
-            >
-              <Pencil className="text-white w-6 h-6" />
-            </div>
-          </div>
+          )}
+
+          {showResumeModal && (
+            <ResumeModal
+              onClose={() => setShowResumeModal(false)}
+              onUpload={handleResumeUpload}
+              setFile={setResumeFile}
+            />
+          )}
 
           <div className="flex-1 space-y-4 w-full">
             <div>
               <strong>Name:</strong>
               {isEditing ? (
-                <div>
+                <>
                   <input
                     name="name"
                     value={name}
@@ -167,7 +200,7 @@ const Profile = () => {
                     onChange={handleChange}
                     className="w-full mt-1 border p-2 rounded"
                   />
-                </div>
+                </>
               ) : (
                 <span className="ml-2 text-xl">
                   {user.name} {user.surname}
@@ -204,7 +237,6 @@ const Profile = () => {
               <p className="text-sm text-gray-500">
                 Profile Created: {new Date(created_at).toLocaleDateString()}
               </p>
-             
             </div>
           </div>
         </div>
@@ -269,7 +301,7 @@ const Profile = () => {
             <strong>Resume:</strong>
             {details?.resume_link_to_file ? (
               <a
-                href={details.resume_link_to_file}
+                href={`http://localhost:8000${details.resume_link_to_file}`}
                 className="text-blue-600 underline ml-2"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -279,7 +311,7 @@ const Profile = () => {
             ) : (
               <button
                 onClick={() => setShowResumeModal(true)}
-                className="ml-2 text-blue-600 underline"
+                className="ml-2 cursor-pointer text-blue-600 underline"
               >
                 Add Resume
               </button>
@@ -287,84 +319,8 @@ const Profile = () => {
           </div>
         </div>
       </div>
-
+      <JobExperiences />
       <Footer />
-
-      {/* Profile Modal */}
-      {showProfileModal && (
-        <div className="modal-overlay">
-          <div className="bg-white rounded-lg p-6 w-[90%] max-w-md space-y-4">
-            <h3 className="text-xl font-semibold">Upload New Profile Image</h3>
-            <div
-              className="drag-box"
-              onDrop={(e) => {
-                e.preventDefault();
-                setProfileImage(e.dataTransfer.files[0]);
-              }}
-              onDragOver={(e) => e.preventDefault()}
-            >
-              <p>Drag & drop your image here, or click to select</p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setProfileImage(e.target.files[0])}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowProfileModal(false)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleProfileUpload}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Resume Modal */}
-      {showResumeModal && (
-        <div className="modal-overlay">
-          <div className="bg-white rounded-lg p-6 w-[90%] max-w-md space-y-4">
-            <h3 className="text-xl font-semibold">Upload Resume</h3>
-            <div
-              className="drag-box"
-              onDrop={(e) => {
-                e.preventDefault();
-                setResumeFile(e.dataTransfer.files[0]);
-              }}
-              onDragOver={(e) => e.preventDefault()}
-            >
-              <p>Drag & drop your PDF here, or click to select</p>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={(e) => setResumeFile(e.target.files[0])}
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowResumeModal(false)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleResumeUpload}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Upload
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

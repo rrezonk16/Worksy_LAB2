@@ -254,6 +254,8 @@ const CreateJobApplication = () => {
               <option value="yesno">Yes/No</option>
               <option value="select">Select</option>
               <option value="text">Text Input</option>
+                            <option value="file">File Upload</option>
+
             </select>
 
             {inputType === "select" && (

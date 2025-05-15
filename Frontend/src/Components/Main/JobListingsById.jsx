@@ -4,7 +4,6 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import Navbar from "../Navigation/Navbar";
 import Footer from "../Navigation/Footer";
 import gsap from "gsap";
-import { useLocation } from "react-router-dom"; // Add this at the top
 import { FaLinkedinIn, FaFacebookF, FaTwitter } from "react-icons/fa";
 
 const JobListingsById = () => {
@@ -14,8 +13,6 @@ const JobListingsById = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const loadingRef = useRef();
-  const location = useLocation();
-  const currentUrl = `${window.location.origin}${location.pathname}`;
   useEffect(() => {
     const fetchJob = async () => {
       try {
@@ -34,8 +31,33 @@ const JobListingsById = () => {
   const handleChange = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
+  // function notifications(title, message) {
+  //   // Check if browser supports notifications
+  //   if (!("Notification" in window)) {
+  //     console.warn("This browser does not support desktop notifications.");
+  //     return;
+  //   }
+
+  //   // Check notification permission
+  //   if (Notification.permission === "granted") {
+  //     new Notification(title, { body: message });
+  //   } else if (Notification.permission !== "denied") {
+  //     Notification.requestPermission().then((permission) => {
+  //       if (permission === "granted") {
+  //         new Notification(title, { body: message });
+  //       }
+  //     });
+  //   }
+  // }
 
   const handleSubmit = async (e) => {
+  // if ("Notification" in window && Notification.permission !== "granted") {
+  //   Notification.requestPermission().then(permission => {
+  //     if (permission === "granted") {
+  //       notifications("Notifications Enabled", "You’ll receive updates here.");
+  //     }
+  //   });
+  // }
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
@@ -44,10 +66,12 @@ const JobListingsById = () => {
     }
 
     const formattedAnswers = Object.entries(answers).map(
-      ([questionId, answer]) => ({
-        question_id: questionId,
-        answer,
-      })
+      ([questionId, answer]) => {
+        return {
+          question_id: questionId,
+          answer: answer instanceof File ? answer : answer,
+        };
+      }
     );
 
     setIsSubmitting(true);
@@ -58,14 +82,25 @@ const JobListingsById = () => {
     });
 
     try {
+      const formData = new FormData();
+      formData.append("job_id", id);
+
+      formattedAnswers.forEach((answer, index) => {
+        formData.append(`answers[${index}][question_id]`, answer.question_id);
+
+        if (answer.answer instanceof File) {
+          formData.append(`answers[${index}][answer]`, answer.answer);
+        } else {
+          formData.append(`answers[${index}][answer]`, answer.answer);
+        }
+      });
+
       const response = await axios.post(
         `http://127.0.0.1:8000/api/job-apply`,
-        {
-          job_id: id,
-          answers: formattedAnswers,
-        },
+        formData,
         {
           headers: {
+            "Content-Type": "multipart/form-data",
             Authorization: `Bearer ${token}`,
           },
         }
@@ -78,13 +113,11 @@ const JobListingsById = () => {
       navigate("/my-applications");
     } catch (error) {
       console.error("Failed to apply:", error);
-      
       alert(
         error.response?.data?.message ||
           "Something went wrong. Please try again."
       );
       navigate("/my-applications");
-
     } finally {
       gsap.to(loadingRef.current, {
         autoAlpha: 0,
@@ -102,10 +135,33 @@ const JobListingsById = () => {
   }
 
   const { details, company } = job;
+// const sendTestNotification = () => {
+//   axios.post('http://localhost:8000/api/send-notification', {
+//     message: 'This is a test notification!'
+//   })
+//   .then((response) => {
+//     console.log('Notification sent successfully:', response.data);
+//   })
+//   .catch((error) => {
+//     console.error('Error sending notification:', error);
+//   });
+// };
+
+
+// const sendTestNotification2 = () => {
+//   if (Notification.permission === "granted") {
+//     new Notification("Test Notification", {
+//       body: "This is a test notification",
+//     });
+//   }
+// };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
+{/* <button onClick={sendTestNotification}>Send Test Notification</button>
+<button onClick={sendTestNotification2}>Send Test Notification</button> */}
 
       <div
         ref={loadingRef}
@@ -310,6 +366,13 @@ const JobListingsById = () => {
                         </option>
                       ))}
                     </select>
+                  ) : q.input_type === "file" ? (
+                    <input
+                      type="file"
+                      required={q.is_required}
+                      onChange={(e) => handleChange(q.id, e.target.files[0])}
+                      className="w-full border rounded px-3 py-2"
+                    />
                   ) : (
                     <input
                       type="text"

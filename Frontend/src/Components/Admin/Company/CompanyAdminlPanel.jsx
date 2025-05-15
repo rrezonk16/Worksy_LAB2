@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import logo_icon from "../../../assets/logo_icon.png";
 import CreateJobApplication from "./CreateJobApplication";
 import CompanyJobsList from "./CompanyJobsList";
+import UploadCompanyLogo from "./UploadCompanyLogo";
+import EditJobForm from "./EditJobForm";
 
 const CompanyAdminPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -11,22 +13,29 @@ const CompanyAdminPanel = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if the company_user_token exists in localStorage
     const token = localStorage.getItem("company_user_token");
 
     if (!token) {
-      // If no token, navigate to the login page
       navigate("/company/panel/login");
     } else {
-      // Optionally, you can set permissions from the token or do other checks
-      const storedPermissions = JSON.parse(localStorage.getItem("permissions")) || [];
+      const storedPermissions =
+        JSON.parse(localStorage.getItem("permissions")) || [];
       setPermissions(storedPermissions);
     }
   }, [navigate]);
 
   const getActiveTab = () => {
     const params = new URLSearchParams(location.search);
-    return params.get("active-tab") || "users";
+    const raw = params.get("active-tab");
+    if (raw?.startsWith("edit-job=")) return "edit-job";
+    return raw || "users";
+  };
+
+  const getEditJobId = () => {
+    const params = new URLSearchParams(location.search);
+    const raw = params.get("active-tab");
+    if (raw?.startsWith("edit-job=")) return raw.split("=")[1];
+    return null;
   };
 
   const handleLogout = () => {
@@ -41,12 +50,17 @@ const CompanyAdminPanel = () => {
       case "jobs-list":
         return <CompanyJobsList />;
       case "users":
-        return <div>Company Users Page</div>;
+        return <div className="mt-16">Company Users Page</div>;
+      case "profile":
+        return <UploadCompanyLogo />;
+      case "edit-job":
+        return <EditJobForm jobId={getEditJobId()} />;
       default:
         return <div>Dashboard</div>;
     }
-  };
+  };  
 
+  
   return (
     <div className="flex">
       {/* Navbar */}
@@ -83,6 +97,14 @@ const CompanyAdminPanel = () => {
               className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
             >
               Company Users
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => navigate("?active-tab=profile")}
+              className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+            >
+              Profile{" "}
             </button>
           </li>
           <li>

@@ -28,6 +28,8 @@ import Rejected from "./Components/Admin/Company/Rejected";
 import WelcomeCompany from "./Components/Employers/WelcomeCompany";
 import SubscribePage from "./Components/Premium/SubscribePage";
 import ApplicationsDetails from "./Components/Jobs/ApplicationsDetails";
+import MakeCV from "./Components/Admin/User/MakeCV";
+import NotificationReceiver from "./NotificationReceiver"; // NotificationReceiver for pop-up notifications
 
 const routes = [
   {
@@ -107,6 +109,10 @@ const routes = [
     element: <ApplicationsDetails />,
   },
   {
+    path: "/cv-maker",
+    element: <MakeCV />,
+  },
+  {
     path: "/*",
     element: <Error404 />,
   },
@@ -117,11 +123,14 @@ function App() {
     <Router>
       <div>
         <ErrorBoundary>
+          {/* Place NotificationReceiver inside ErrorBoundary to catch errors */}
+          <NotificationReceiver /> 
+
           <Routes>
             {routes.map((route, index) => (
               <Route key={index} path={route.path} element={route.element} />
             ))}
-          </Routes>{" "}
+          </Routes>
         </ErrorBoundary>
       </div>
     </Router>

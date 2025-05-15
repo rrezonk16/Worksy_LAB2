@@ -18,6 +18,7 @@ const VerifyCompanies = () => {
             headers: {
               Authorization: `Bearer ${token}`,
             },
+
           }
         );
         console.log("Companies:", response.data);        
@@ -85,6 +86,7 @@ const VerifyCompanies = () => {
           },
         }
       );
+
       alert("Verification refused!");
       closeModal();
     } catch (error) {
@@ -151,6 +153,27 @@ const VerifyCompanies = () => {
 
           );
         }
+        else if (params.data.status === "approved") {
+          return (
+            <button
+              onClick={() => handleActivateClick(params.data)}
+              className="bg-green-500 text-white p-2 rounded mt-1 h-8 w-20 text-center cursor-pointer items-center flex justify-center"
+            >
+              Approved
+            </button>
+          );
+        }
+        else if (params.data.status === "rejected") {
+          return (
+            <button
+              onClick={() => handleActivateClick(params.data)}
+              className="bg-red-500 text-white p-2 rounded mt-1 h-8 w-20 text-center cursor-pointer items-center flex justify-center"
+            >
+              Rejected
+            </button>
+          );
+        }
+
         return null;
       },
     },
@@ -259,3 +282,4 @@ const VerifyCompanies = () => {
 };
 
 export default VerifyCompanies;
+

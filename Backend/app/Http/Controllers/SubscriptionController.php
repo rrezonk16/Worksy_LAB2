@@ -90,9 +90,15 @@ class SubscriptionController extends Controller
 
         try {
             $companyEmail = $company->email;
-            Mail::to($companyEmail)->send(new WelcomePremiumSubscriber($company->name, $startDate->toDateString(), $validated['subscription_type']));
+            Mail::to($companyEmail)->queue(
+                new WelcomePremiumSubscriber(
+                    $company->name,
+                    $startDate->toDateString(),
+                    $validated['subscription_type']
+                )
+            );
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to send welcome email. ' . $e->getMessage()], 500);
+            \Log::error('Failed to queue welcome email: ' . $e->getMessage());
         }
 
         return response()->json(['message' => 'Subscription activated successfully.'], 200);
