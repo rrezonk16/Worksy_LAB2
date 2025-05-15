@@ -36,7 +36,15 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (["birthday", "gender", "bio", "skills_tag", "resume_link_to_file"].includes(name)) {
+    if (
+      [
+        "birthday",
+        "gender",
+        "bio",
+        "skills_tag",
+        "resume_link_to_file",
+      ].includes(name)
+    ) {
       setFormData((prev) => ({
         ...prev,
         details: {
@@ -62,7 +70,10 @@ const Profile = () => {
     data.append("gender", formData.details?.gender || "");
     data.append("bio", formData.details?.bio || "");
     data.append("skills_tag", formData.details?.skills_tag || "");
-    data.append("resume_link_to_file", formData.details?.resume_link_to_file || "");
+    data.append(
+      "resume_link_to_file",
+      formData.details?.resume_link_to_file || ""
+    );
     data.append("social_links[]", formData.details?.social_links?.[0] || "");
     data.append("social_links[]", formData.details?.social_links?.[1] || "");
 
@@ -76,7 +87,7 @@ const Profile = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "multipart/form-data",
         },
-      })  
+      })
       .then(() => {
         alert("Profile updated successfully");
         setShowProfileModal(false);
@@ -92,7 +103,7 @@ const Profile = () => {
 
   const handleResumeUpload = () => {
     const data = new FormData();
-    data.append("resume", resumeFile);
+    data.append("cv", resumeFile);
 
     axios
       .post("http://127.0.0.1:8000/api/upload-resume", data, {
@@ -109,7 +120,12 @@ const Profile = () => {
       .catch((err) => console.error(err));
   };
 
-  if (!user) return <div className="p-6"><IconLoading/></div>;
+  if (!user)
+    return (
+      <div className="p-6">
+        <IconLoading />
+      </div>
+    );
 
   const { name, surname, email, phone_number, created_at, details } = formData;
   return (
@@ -119,12 +135,12 @@ const Profile = () => {
         <h2 className="text-3xl font-bold mb-6 text-center">My Profile</h2>
 
         <div className="flex justify-end mb-4 gap-4">
-        <button
-              onClick={navigate.bind(null, "/cv-maker")}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-            >
-              Generate your CV
-            </button>
+          <button
+            onClick={navigate.bind(null, "/cv-maker")}
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+          >
+            Generate your CV
+          </button>
           {isEditing && (
             <button
               onClick={handleUpdate}
@@ -285,7 +301,7 @@ const Profile = () => {
             <strong>Resume:</strong>
             {details?.resume_link_to_file ? (
               <a
-                href={details.resume_link_to_file}
+                href={`http://localhost:8000${details.resume_link_to_file}`}
                 className="text-blue-600 underline ml-2"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -303,7 +319,7 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <JobExperiences/>
+      <JobExperiences />
       <Footer />
     </>
   );

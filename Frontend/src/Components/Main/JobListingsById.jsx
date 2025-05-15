@@ -31,8 +31,33 @@ const JobListingsById = () => {
   const handleChange = (questionId, value) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));
   };
+  // function notifications(title, message) {
+  //   // Check if browser supports notifications
+  //   if (!("Notification" in window)) {
+  //     console.warn("This browser does not support desktop notifications.");
+  //     return;
+  //   }
+
+  //   // Check notification permission
+  //   if (Notification.permission === "granted") {
+  //     new Notification(title, { body: message });
+  //   } else if (Notification.permission !== "denied") {
+  //     Notification.requestPermission().then((permission) => {
+  //       if (permission === "granted") {
+  //         new Notification(title, { body: message });
+  //       }
+  //     });
+  //   }
+  // }
 
   const handleSubmit = async (e) => {
+  // if ("Notification" in window && Notification.permission !== "granted") {
+  //   Notification.requestPermission().then(permission => {
+  //     if (permission === "granted") {
+  //       notifications("Notifications Enabled", "You’ll receive updates here.");
+  //     }
+  //   });
+  // }
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
@@ -40,12 +65,14 @@ const JobListingsById = () => {
       return;
     }
 
-const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => {
-  return {
-    question_id: questionId,
-    answer: answer instanceof File ? answer : answer, 
-  };
-});
+    const formattedAnswers = Object.entries(answers).map(
+      ([questionId, answer]) => {
+        return {
+          question_id: questionId,
+          answer: answer instanceof File ? answer : answer,
+        };
+      }
+    );
 
     setIsSubmitting(true);
     gsap.to(loadingRef.current, {
@@ -54,51 +81,51 @@ const formattedAnswers = Object.entries(answers).map(([questionId, answer]) => {
       ease: "power2.out",
     });
 
-try {
-  const formData = new FormData();
-  formData.append("job_id", id);
+    try {
+      const formData = new FormData();
+      formData.append("job_id", id);
 
-  formattedAnswers.forEach((answer, index) => {
-    formData.append(`answers[${index}][question_id]`, answer.question_id);
+      formattedAnswers.forEach((answer, index) => {
+        formData.append(`answers[${index}][question_id]`, answer.question_id);
 
-    if (answer.answer instanceof File) {
-      formData.append(`answers[${index}][answer]`, answer.answer);
-    } else {
-      formData.append(`answers[${index}][answer]`, answer.answer);
+        if (answer.answer instanceof File) {
+          formData.append(`answers[${index}][answer]`, answer.answer);
+        } else {
+          formData.append(`answers[${index}][answer]`, answer.answer);
+        }
+      });
+
+      const response = await axios.post(
+        `http://127.0.0.1:8000/api/job-apply`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.status !== 200) {
+        throw new Error("Failed to apply for the job");
+      }
+
+      navigate("/my-applications");
+    } catch (error) {
+      console.error("Failed to apply:", error);
+      alert(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
+      navigate("/my-applications");
+    } finally {
+      gsap.to(loadingRef.current, {
+        autoAlpha: 0,
+        duration: 0.5,
+        ease: "power2.out",
+      });
+      setIsSubmitting(false);
     }
-  });
-
-  const response = await axios.post(
-    `http://127.0.0.1:8000/api/job-apply`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
-
-  if (response.status !== 200) {
-    throw new Error("Failed to apply for the job");
-  }
-
-  navigate("/my-applications");
-} catch (error) {
-  console.error("Failed to apply:", error);
-  alert(
-    error.response?.data?.message || "Something went wrong. Please try again."
-  );
-  navigate("/my-applications");
-} finally {
-  gsap.to(loadingRef.current, {
-    autoAlpha: 0,
-    duration: 0.5,
-    ease: "power2.out",
-  });
-  setIsSubmitting(false);
-}
-
   };
 
   if (!job) {
@@ -108,10 +135,33 @@ try {
   }
 
   const { details, company } = job;
+// const sendTestNotification = () => {
+//   axios.post('http://localhost:8000/api/send-notification', {
+//     message: 'This is a test notification!'
+//   })
+//   .then((response) => {
+//     console.log('Notification sent successfully:', response.data);
+//   })
+//   .catch((error) => {
+//     console.error('Error sending notification:', error);
+//   });
+// };
+
+
+// const sendTestNotification2 = () => {
+//   if (Notification.permission === "granted") {
+//     new Notification("Test Notification", {
+//       body: "This is a test notification",
+//     });
+//   }
+// };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
+{/* <button onClick={sendTestNotification}>Send Test Notification</button>
+<button onClick={sendTestNotification2}>Send Test Notification</button> */}
 
       <div
         ref={loadingRef}

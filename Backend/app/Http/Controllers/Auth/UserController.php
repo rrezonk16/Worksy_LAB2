@@ -13,10 +13,53 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\UserDetail;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
 
+    public function changePassword(Request $request)
+{
+    $user = auth()->user();
+
+    $validator = Validator::make($request->all(), [
+        'current_password' => 'required',
+        'new_password' => 'required|min:6|confirmed',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    if (!Hash::check($request->current_password, $user->password)) {
+        return response()->json(['message' => 'Current password is incorrect'], 403);
+    }
+
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return response()->json(['message' => 'Password changed successfully']);
+}
+
+public function uploadCV(Request $request)
+{
+    $request->validate([
+        'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+    ]);
+
+    $user = auth()->user();
+
+    $path = $request->file('cv')->store('public/cvs');
+
+    $cvUrl = Storage::url($path);
+
+    $details = UserDetail::updateOrCreate(
+        ['user_id' => $user->id],
+        ['resume_link_to_file' => $cvUrl]
+    );
+
+    return response()->json(['message' => 'CV uploaded successfully', 'cv_url' => $cvUrl]);
+}
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [

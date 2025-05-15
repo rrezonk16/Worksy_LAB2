@@ -1,6 +1,3 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-
 const EditJobModal = ({ showModal, setShowModal, jobData, setJobData, handleUpdate }) => {
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,7 +17,7 @@ const EditJobModal = ({ showModal, setShowModal, jobData, setJobData, handleUpda
         showModal ? "block" : "hidden"
       }`}
     >
-      <div className="bg-white p-6 shadow-xl rounded-lg max-w-md w-full">
+      <div className="bg-white p-6 shadow-xl rounded-lg max-w-md w-full h-screen overflow-y-auto">
         <h3 className="text-xl font-semibold mb-4">Edit Job Experience</h3>
         <form
           onSubmit={(e) => {

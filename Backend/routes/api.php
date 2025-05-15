@@ -16,6 +16,7 @@ use App\Http\Controllers\UserDetailController;
 use App\Http\Controllers\PastJobController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\NotificationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +47,7 @@ Route::get('/api/jobs/{id}', [JobController::class, 'show']);
 // Past Jobs (Public access by user ID)
 Route::get('user/{userId}/past-jobs', [PastJobController::class, 'getByUserId']);
 
-
+Route::post('send-notification', [NotificationController::class, 'sendNotification']);
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES (AUTHENTICATED via Sanctum)
@@ -63,7 +64,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/user/update-profile', [UserDetailController::class, 'updateProfileAndDetails']);
     Route::post('/user/profile-image-update', [UserDetailController::class, 'updateProfileImage']);
     Route::get('/get-my-permissions', [UserController::class, 'getMyPermissions']);
-
+    Route::post('/user/change-password', [UserController::class, 'changePassword']);
+    Route::post('/upload-resume', [UserController::class, 'uploadCV']);
     // User Management (with permissions)
     Route::get('users', [UserController::class, 'getAllUsers'])->middleware('permission:READ_USERS');
     Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:READ_USERS');
@@ -91,7 +93,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/jobs/{id}', [JobController::class, 'show']);
     Route::put('/jobs/{id}', [JobController::class, 'update']);
     Route::delete('/jobs/{id}', [JobController::class, 'destroy']);
-
+    Route::delete('/admin/jobs/{id}', [JobController::class, 'forceDelete']);
+    Route::get('/admin/jobs/all', [JobController::class, 'getAllJobsRaw']);
 
     // Job Applications
     Route::post('/job-apply', [JobApplicationController::class, 'apply']);

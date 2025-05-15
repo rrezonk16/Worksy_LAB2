@@ -10,6 +10,7 @@ import RolePermissionManager from "./RolePermissionManager";
 import UserRoleManager from "./UserRoleManager";
 import axios from "axios";
 import IconLoading from "../../Loaders/IconLoading";
+import JobsManager from "./JobsManager";
 
 const AdminInternalPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -61,6 +62,9 @@ const AdminInternalPanel = () => {
         ) : (
           <AccessDenied />
         );
+        case "manage-jobs":
+        return permissions.includes("EDIT_JOB") ? <JobsManager /> : <AccessDenied />;
+        
       case "roles":
         return permissions.includes("READ_ROLES") ? <RolePermissionManager /> : <AccessDenied />;
       case "manage-roles":
@@ -165,6 +169,17 @@ const AdminInternalPanel = () => {
               </li>
             </>
           )}
+          {permissions.includes("EDIT_JOB") && (
+            <li>
+              <button
+                onClick={() => navigate("?active-tab=manage-jobs")}
+                className="block w-full text-left p-3 rounded-md text-green-700 hover:bg-green-200"
+              >
+                Jobs Manager
+              </button>
+            </li>
+          )}
+          {/* Add more sidebar items based on permissions */}
           <li>
             <button
               onClick={handleLogout}

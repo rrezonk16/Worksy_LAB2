@@ -49,10 +49,11 @@ const JobListings = () => {
               ? selectedHashtags.split(",").map((h) => h.trim())
               : undefined,
             deadline,
-            page: currentPage, // ✅ Add this line
+            page: currentPage, 
           },
         }
       );
+      console.log(response.data);
 
       setJobs(response.data.data);
 
@@ -184,7 +185,7 @@ const JobListings = () => {
                           : "http://localhost:5173/src/assets/logo_icon.png"
                       }
                       alt="Company Logo"
-                      className="h-14 object-cover"
+                      className="w-14 object-cover"
                     />
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800">
@@ -199,6 +200,15 @@ const JobListings = () => {
                   <h2 className="text-xl font-bold text-gray-800 mb-2 text-center">
                     {job.title}
                   </h2>
+                  {job.company?.isPremium && (
+  <div className="flex justify-center mb-2">
+    <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+      <span>PREMIUM</span>
+      <span>⭐</span>
+    </span>
+  </div>
+)}
+
                   <p className="text-gray-600 text-sm mb-3 text-center">
                     {job.description.length > 100
                       ? job.description.slice(0, 100) + "..."

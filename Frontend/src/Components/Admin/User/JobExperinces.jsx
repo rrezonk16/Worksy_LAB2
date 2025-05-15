@@ -235,7 +235,6 @@ const JobExperiences = ({ userId }) => {
         </div>
       )}
 
-      {/* Display Past Jobs */}
       <div className="mt-6">
         <h3 className="text-xl font-semibold mb-4">Past Job Experiences</h3>
         <ul className="space-y-4">
@@ -243,7 +242,7 @@ const JobExperiences = ({ userId }) => {
             pastJobs.map((job) => (
               <li
                 key={job.id}
-                className="bg-white p-6 shadow-md rounded-xl flex justify-between items-center"
+                className="bg- p-6 shadow-md rounded-xl flex justify-between items-center"
               >
                 <div>
                   <h4 className="text-lg font-semibold">{job.company_name}</h4>
