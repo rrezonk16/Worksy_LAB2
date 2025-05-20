@@ -5,8 +5,11 @@ import { AllCommunityModule, ModuleRegistry } from "ag-grid-community";
 ModuleRegistry.registerModules([AllCommunityModule]);
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
+import * as XLSX from "xlsx";
 
 import double_tap from "../../../assets/tap.png";
+import { set } from "date-fns";
+import SendInterviewInviteModal from "./SendInterviewInviteModal";
 const CompanyJobsList = () => {
   const [jobs, setJobs] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
@@ -15,7 +18,8 @@ const CompanyJobsList = () => {
   const [error, setError] = useState(null);
   const [showTip, setShowTip] = useState(true);
   const navigate = useNavigate();
-
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAppId, setSelectedAppId] = useState(null);
   useEffect(() => {
     const fetchJobs = async () => {
       const token = localStorage.getItem("company_user_token");
@@ -63,43 +67,64 @@ const CompanyJobsList = () => {
     setApplications([]);
   };
 
- const handleDeleteJob = async () => {
-  // Ensure a job is selected
-  if (!selectedJob) {
-    setError("No job selected");
-    return;
-  }
-
-  // Get token from localStorage
-  const token = localStorage.getItem("company_user_token");
-
-  // Check if token exists
-  if (!token) {
-    setError("No token found");
-    return;
-  }
-
-  try {
-    // Attempt to delete the job
-    const response = await axios.delete(`http://localhost:8000/api/jobs/${selectedJob.id}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    console.log(response.data);
-    
-
-    // Handle success
-    if (response.status === 200) {
-      // Optionally update the UI (e.g., remove the job from the list)
-      setJobs(prevJobs => prevJobs.filter(job => job.id !== selectedJob.id));
-      setError(null);  // Reset error on success
-      alert("Job deleted successfully");
+  const handleDeleteJob = async () => {
+    // Ensure a job is selected
+    if (!selectedJob) {
+      setError("No job selected");
+      return;
     }
-  } catch (error) {
-    // Handle errors
-  console.log(error);
-  }
-};
 
+    // Get token from localStorage
+    const token = localStorage.getItem("company_user_token");
+
+    // Check if token exists
+    if (!token) {
+      setError("No token found");
+      return;
+    }
+
+    try {
+      const response = await axios.delete(
+        `http://localhost:8000/api/jobs/${selectedJob.id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(response.data);
+
+      if (response.status === 200) {
+        setJobs((prevJobs) =>
+          prevJobs.filter((job) => job.id !== selectedJob.id)
+        );
+        setError(null);
+        alert("Job deleted successfully");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const exportToExcel = () => {
+    const data = applications.flatMap((app) =>
+      app.answers.map((ans) => ({
+        Name: `${app.user.name} ${app.user.surname}`,
+        Email: app.user.email,
+        Phone: app.user.phone_number,
+        Question: ans.question.question_text,
+        Answer:
+          typeof ans.answer === "string" &&
+          ans.answer.startsWith("applications/")
+            ? `http://localhost:8000/storage/${ans.answer}`
+            : ans.answer,
+      }))
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Applications");
+
+    XLSX.writeFile(workbook, "applications.xlsx");
+  };
 
   const colDefs = [
     { headerName: "Job Title", field: "title" },
@@ -138,6 +163,14 @@ const CompanyJobsList = () => {
           Applications for:{" "}
           <span className="text-indigo-600">{selectedJob.title}</span>
         </h2>
+        {applications.length > 0 && (
+          <button
+            onClick={exportToExcel}
+            className="mb-6 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+          >
+            Export to Excel
+          </button>
+        )}
 
         {applications.length === 0 ? (
           <p className="text-gray-500">No applications yet.</p>
@@ -147,14 +180,42 @@ const CompanyJobsList = () => {
               key={app.id}
               className="mb-8 p-6 border rounded-lg shadow-sm bg-white"
             >
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  {app.user.name} {app.user.surname}
-                </h3>
-                <p className="text-sm text-gray-600">{app.user.email}</p>
-                <p className="text-sm text-gray-600">
-                  <strong>Phone:</strong> {app.user.phone_number}
-                </p>
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {app.user.name} {app.user.surname}
+                  </h3>
+                  <p className="text-sm text-gray-600">{app.user.email}</p>
+                  <p className="text-sm text-gray-600">
+                    <strong>Phone:</strong> {app.user.phone_number}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <a
+                    href={`/profile/${app.user.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <button className=" cursor-pointer bg-green-700 rounded-2xl p-3 text-white hover:bg-green-600">
+                      {" "}
+                      Open Profile
+                    </button>
+                  </a>
+                  <button
+                    className=" cursor-pointer bg-blue-700 rounded-2xl p-3 text-white hover:bg-blue-600"
+                    onClick={() => {
+                      setSelectedAppId(app.id);
+                      setShowModal(true);
+                    }}
+                  >
+                    <img
+                      src="https://img.icons8.com/ios-filled/24/ffffff/new-post.png"
+                      alt="Send Invite"
+                      className="inline-block mr-2"
+                    />
+                    Send Invite
+                  </button>
+                </div>
               </div>
 
               <div>
@@ -185,6 +246,13 @@ const CompanyJobsList = () => {
             </div>
           ))
         )}
+          {showModal && (
+        <SendInterviewInviteModal
+          applicationId={selectedAppId}
+          onClose={() => setShowModal(false)}
+          onSuccess={() => {}}
+        />
+      )}
       </div>
     );
   }
@@ -232,6 +300,8 @@ const CompanyJobsList = () => {
           onRowDoubleClicked={handleRowDoubleClick}
         />
       </div>
+
+    
     </div>
   );
 };

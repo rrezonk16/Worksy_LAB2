@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\InterviewScheduledMail;
 use App\Models\JobApplication;
 use App\Models\JobApplicationAnswer;
 use Illuminate\Http\Request;
@@ -9,10 +10,13 @@ use Illuminate\Support\Facades\Mail;
 use App\Models\Job;
 use App\Mail\JobApplicationConfirmationMail;
 use App\Mail\JobApplicationSubmitted;
+use App\Models\Interview;
 use App\Models\JobQuestion;
 
 class JobApplicationController extends Controller
 {
+
+  
 
     public function getUserApplications()
     {
@@ -245,60 +249,58 @@ class JobApplicationController extends Controller
 
 
     public function updateApplication(Request $request, $applicationId)
-{
-    $request->validate([
-        'answers' => 'required|array',
-        'answers.*.question_id' => 'required|exists:job_questions,id',
-        'answers.*.answer' => 'required' // string or file
-    ]);
-
-    $user = auth()->user();
-
-    $application = JobApplication::where('id', $applicationId)
-        ->where('user_id', $user->id)
-        ->first();
-
-    if (!$application) {
-        return response()->json(['message' => 'Application not found.'], 404);
-    }
-
-    // Delete old answers
-    JobApplicationAnswer::where('job_application_id', $application->id)->delete();
-
-    $answerData = [];
-
-    foreach ($request->answers as $index => $ans) {
-        $question = JobQuestion::find($ans['question_id']);
-        $inputType = $question->input_type;
-
-        $storedAnswer = '';
-
-        if ($inputType === 'file') {
-            $fileKey = "answers.$index.answer";
-            if ($request->hasFile($fileKey)) {
-                $file = $request->file($fileKey);
-                $path = $file->store('applications/files', 'public');
-                $storedAnswer = $path;
-            } else {
-                continue;
-            }
-        } else {
-            $storedAnswer = $ans['answer'];
-        }
-
-        JobApplicationAnswer::create([
-            'job_application_id' => $application->id,
-            'job_question_id' => $ans['question_id'],
-            'answer' => $storedAnswer,
+    {
+        $request->validate([
+            'answers' => 'required|array',
+            'answers.*.question_id' => 'required|exists:job_questions,id',
+            'answers.*.answer' => 'required' // string or file
         ]);
 
-        $answerData[] = [
-            'question' => $question->question_text,
-            'answer' => $inputType === 'file' ? asset('storage/' . $storedAnswer) : $storedAnswer,
-        ];
+        $user = auth()->user();
+
+        $application = JobApplication::where('id', $applicationId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$application) {
+            return response()->json(['message' => 'Application not found.'], 404);
+        }
+
+        JobApplicationAnswer::where('job_application_id', $application->id)->delete();
+
+        $answerData = [];
+
+        foreach ($request->answers as $index => $ans) {
+            $question = JobQuestion::find($ans['question_id']);
+            $inputType = $question->input_type;
+
+            $storedAnswer = '';
+
+            if ($inputType === 'file') {
+                $fileKey = "answers.$index.answer";
+                if ($request->hasFile($fileKey)) {
+                    $file = $request->file($fileKey);
+                    $path = $file->store('applications/files', 'public');
+                    $storedAnswer = $path;
+                } else {
+                    continue;
+                }
+            } else {
+                $storedAnswer = $ans['answer'];
+            }
+
+            JobApplicationAnswer::create([
+                'job_application_id' => $application->id,
+                'job_question_id' => $ans['question_id'],
+                'answer' => $storedAnswer,
+            ]);
+
+            $answerData[] = [
+                'question' => $question->question_text,
+                'answer' => $inputType === 'file' ? asset('storage/' . $storedAnswer) : $storedAnswer,
+            ];
+        }
+
+        return response()->json(['message' => 'Application updated successfully.']);
     }
-
-    return response()->json(['message' => 'Application updated successfully.']);
-}
-
 }

@@ -1,11 +1,41 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const EditJobForm = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const activeTab = queryParams.get("active-tab");
+  const [subscription, setSubscription] = useState(null);
+  const navigate = useNavigate();
+
+
+   useEffect(() => {
+    const token = localStorage.getItem("company_user_token");
+
+    if (!token) {
+      navigate("/company/panel/login");
+      return;
+    }
+    axios
+      .get("http://localhost:8000/api/subscription", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        if (response.status === 404) {
+          setSubscription(null);
+        } else {
+          setSubscription(response.data.subscription);
+        }
+      })
+      .catch((error) => {
+        if (error.response && error.response.status === 404) {
+          setSubscription(null);
+        }
+      });
+  }, [navigate]);
 
   let jobId = null;
   if (activeTab && activeTab.startsWith("edit-job=")) {
@@ -29,6 +59,7 @@ const EditJobForm = () => {
   });
 
   const [loading, setLoading] = useState(false);
+  const token = localStorage.getItem("company_user_token");
 
   useEffect(() => {
     const token = localStorage.getItem("company_user_token");
@@ -86,17 +117,20 @@ const EditJobForm = () => {
     setForm((prev) => ({ ...prev, newQuestions: updated }));
   };
 
-  // const addNewQuestion = () => {
-  //   setForm(prev => ({
-  //     ...prev,
-  //     newQuestions: [...prev.newQuestions, {
-  //       question_text: '',
-  //       input_type: 'text',
-  //       is_required: false,
-  //       options: []
-  //     }]
-  //   }));
-  // };
+  const addNewQuestion = () => {
+    setForm((prev) => ({
+      ...prev,
+      newQuestions: [
+        ...prev.newQuestions,
+        {
+          question_text: "",
+          input_type: "text",
+          is_required: false,
+          options: [],
+        },
+      ],
+    }));
+  };
 
   const removeQuestion = (index, fromNew = false) => {
     if (fromNew) {
@@ -114,33 +148,35 @@ const EditJobForm = () => {
     e.preventDefault();
     setLoading(true);
 
-    const data = new FormData();
-    data.append("title", form.title);
-    data.append("description", form.description);
-    if (form.attachment) data.append("attachment", form.attachment);
-
-    data.append("wage", form.wage);
-    data.append("location", form.location);
-    data.append("employment_type", form.employment_type);
-    data.append("experience_level", form.experience_level);
-    data.append("hashtags", JSON.stringify(form.hashtags));
-    data.append("benefits", JSON.stringify(form.benefits));
-    data.append("deadline", form.deadline);
-
-    data.append("questions", JSON.stringify(form.newQuestions));
+    const payload = {
+      title: form.title,
+      description: form.description,
+      questions: JSON.stringify([...form.questions, ...form.newQuestions]),
+      wage: form.wage,
+      location: form.location,
+      employment_type: form.employment_type,
+      experience_level: form.experience_level,
+      hashtags: form.hashtags,
+      benefits: form.benefits,
+      deadline: form.deadline,
+    };
 
     try {
-      const res = await axios.post(
+      const res = await axios.put(
         `http://localhost:8000/api/jobs/${jobId}/update`,
-        data,
+        payload,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
+
       if (res.status === 200) {
-        window.reload();
+        alert("Job updated successfully!");
+        window.location.reload();
       }
-      alert("Job updated successfully!");
     } catch (err) {
       console.error("Failed to update job:", err);
       alert("Failed to update job.");
@@ -152,7 +188,7 @@ const EditJobForm = () => {
   if (!job) return <div>Loading job...</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-8">
+    <div className="max-w-4xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-18">
       <h2 className="text-3xl font-bold mb-6 text-gray-800">Edit Job</h2>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -303,7 +339,7 @@ const EditJobForm = () => {
                 <button
                   type="button"
                   onClick={() => removeQuestion(i)}
-                  className="text-red-600 text-sm hover:underline"
+                className="text-red-600 text-sm hover:bg-red-500 hover:text-white cursor-pointer border border-red-600 px-2 py-1 rounded mt-5"
                 >
                   Delete
                 </button>
@@ -366,20 +402,27 @@ const EditJobForm = () => {
                   className="input w-full"
                 />
               )}
-
+              <br />
               <button
                 type="button"
                 onClick={() => removeQuestion(i, true)}
-                className="text-red-600 text-sm hover:underline"
+                className="text-red-600 text-sm hover:bg-red-500 hover:text-white cursor-pointer border border-red-600 px-2 py-1 rounded"
               >
                 Remove
               </button>
             </div>
           ))}
 
-          {/* <button type="button" onClick={addNewQuestion} className="btn bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-          Add Question
-        </button> */}
+ <button
+        onClick={addNewQuestion}
+        className={`px-6 mt-3 py-3 rounded-lg shadow transition-all ${
+          subscription === null
+            ? 'hidden'
+            : 'bg-green-600 text-white hover:bg-green-700  cursor-pointer hover:shadow-yellow-500'
+        }`}
+      >
+        Add Custom Question
+      </button>
         </div>
 
         <div className="pt-6">

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns"; // Import date-fns for formatting dates
 import EditJobModal from "./EditJobModal";
-import MakeCV from "./MakeCV";
 
 const JobExperiences = ({ userId }) => {
   const [pastJobs, setPastJobs] = useState([]);

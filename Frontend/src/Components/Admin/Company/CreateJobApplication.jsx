@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -91,6 +91,8 @@ const CreateJobApplication = () => {
           },
         }
       );
+      console.log(response);
+      
       alert("Job created successfully!");
       navigate("/company/dashboard?active-tab=jobs-list");
     } catch (error) {

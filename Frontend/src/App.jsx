@@ -30,6 +30,7 @@ import SubscribePage from "./Components/Premium/SubscribePage";
 import ApplicationsDetails from "./Components/Jobs/ApplicationsDetails";
 import MakeCV from "./Components/Admin/User/MakeCV";
 import NotificationReceiver from "./NotificationReceiver"; // NotificationReceiver for pop-up notifications
+import PublicProfile from "./Components/Main/PublicProfile";
 
 const routes = [
   {
@@ -116,6 +117,10 @@ const routes = [
     path: "/*",
     element: <Error404 />,
   },
+  {
+    path:"/profile/:id",
+    element: <PublicProfile />,
+  },
 ];
 
 function App() {
@@ -123,8 +128,7 @@ function App() {
     <Router>
       <div>
         <ErrorBoundary>
-          {/* Place NotificationReceiver inside ErrorBoundary to catch errors */}
-          <NotificationReceiver /> 
+          {/* <NotificationReceiver />  */}
 
           <Routes>
             {routes.map((route, index) => (

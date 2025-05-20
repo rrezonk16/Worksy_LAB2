@@ -210,6 +210,21 @@ public function uploadCV(Request $request)
         ], 200);
     }
 
+
+    public function getUserById($id)
+{
+    $user = User::with(['role', 'details'])->find($id);
+
+    if (!$user) {
+        return response()->json(['message' => 'User not found.'], 404);
+    }
+
+    return response()->json([
+        'message' => 'User retrieved successfully!',
+        'user' => $user
+    ], 200);
+}
+
     public function getAllUsers()
     {
         $user = Auth::user();

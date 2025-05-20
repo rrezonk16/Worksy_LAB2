@@ -430,7 +430,6 @@ class JobController extends Controller
                 $question->delete();
             }
 
-            // ✅ Create new questions
             $allowedInputTypes = ['text', 'yesno', 'file', 'select'];
 
             foreach ($questions as $q) {

@@ -16,6 +16,7 @@ use App\Http\Controllers\UserDetailController;
 use App\Http\Controllers\PastJobController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\JobApplicationStatusController;
 use App\Http\Controllers\NotificationController;
 
 /*
@@ -40,6 +41,7 @@ Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
 Route::post('/verify-code', [ForgotPasswordController::class, 'verifyCode']);
 Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
+Route::get('/users/{id}', [UserController::class, 'getUserById']);
 
 // Job Details
 Route::get('/api/jobs/{id}', [JobController::class, 'show']);
@@ -86,12 +88,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/company-verification/{companyId}/activate', [CompanyVerificationController::class, 'activateVerification'])->middleware('permission:APPROVE_APPLICATION');
     Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
     Route::post('/apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
-
+    Route::post('/company-users', [CompanyUserLoginController::class, 'createUser']);
+   Route::get('/company-users', [CompanyUserLoginController::class, 'getAllUsers']);
+    Route::put('/company-users/{id}', [CompanyUserLoginController::class, 'updateUser']);
+    Route::delete('/company-users/{id}', [CompanyUserLoginController::class, 'deleteUser']);
+    Route::put('/company-users/{id}/password', [CompanyUserLoginController::class, 'changePassword']);
     // Job Management
     Route::post('/jobs', [JobController::class, 'store']);
     Route::get('/jobs', [JobController::class, 'index']);
     Route::get('/jobs/{id}', [JobController::class, 'show']);
-    Route::put('/jobs/{id}', [JobController::class, 'update']);
+    Route::put('/jobs/{id}/update', [JobController::class, 'update']);
     Route::delete('/jobs/{id}', [JobController::class, 'destroy']);
     Route::delete('/admin/jobs/{id}', [JobController::class, 'forceDelete']);
     Route::get('/admin/jobs/all', [JobController::class, 'getAllJobsRaw']);
@@ -102,7 +108,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/my-applications', [JobApplicationController::class, 'getUserApplications']);
     Route::get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
     Route::put('/job-apply/{applicationId}', [JobApplicationController::class, 'updateApplication']);
-
+    Route::post('/schedule-interview', [JobApplicationStatusController::class, 'schedule']);
 
     // Subscription
     Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);

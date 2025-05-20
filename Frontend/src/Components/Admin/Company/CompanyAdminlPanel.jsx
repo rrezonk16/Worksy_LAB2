@@ -5,6 +5,7 @@ import CreateJobApplication from "./CreateJobApplication";
 import CompanyJobsList from "./CompanyJobsList";
 import UploadCompanyLogo from "./UploadCompanyLogo";
 import EditJobForm from "./EditJobForm";
+import CompanyUsers from "./CompanyUsers";
 
 const CompanyAdminPanel = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -50,7 +51,7 @@ const CompanyAdminPanel = () => {
       case "jobs-list":
         return <CompanyJobsList />;
       case "users":
-        return <div className="mt-16">Company Users Page</div>;
+        return <div className="mt-16"><CompanyUsers/></div>;
       case "profile":
         return <UploadCompanyLogo />;
       case "edit-job":

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState,  useCallback } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { AgGridReact } from "ag-grid-react";
@@ -6,7 +6,6 @@ import { AgGridReact } from "ag-grid-react";
 
 const JobsManager = () => {
   const [rowData, setRowData] = useState([])
-  const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [gridApi, setGridApi] = useState(null)
   const navigate = useNavigate()
@@ -90,11 +89,7 @@ const actionCellRenderer = (params) => (
     fetchJobs()
   }, [])
 
-  const handlePageChange = (newPage) => {
-    if (newPage > 0 && newPage <= totalPages) {
-      fetchJobs(newPage)
-    }
-  }
+
 
   return (
     <div className="p-4">
