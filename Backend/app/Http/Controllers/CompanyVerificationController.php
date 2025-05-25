@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Company;
 use App\Mail\CompanyVerifiedMail;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
 
 class CompanyVerificationController extends Controller
 {
@@ -104,7 +106,6 @@ class CompanyVerificationController extends Controller
     }
     
 
-
 public function activateVerification($companyId)
 {
     $verification = CompanyVerification::where('company_id', $companyId)->first();
@@ -118,13 +119,11 @@ public function activateVerification($companyId)
     $company = Company::find($companyId);
 
     if ($company && $company->email) {
-        Mail::to($company->email)->send(new CompanyVerifiedMail($company));
+        Mail::to($company->email)->queue(new CompanyVerifiedMail($company));
     }
 
     return response()->json(['message' => 'Company verification approved successfully!'], 200);
 }
-
-
     public function refuseVerification($companyId)
     {
         $verification = CompanyVerification::where('company_id', $companyId)->first();

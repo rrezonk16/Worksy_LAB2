@@ -128,7 +128,7 @@ function App() {
     <Router>
       <div>
         <ErrorBoundary>
-          {/* <NotificationReceiver />  */}
+        <NotificationReceiver userId={2} />
 
           <Routes>
             {routes.map((route, index) => (

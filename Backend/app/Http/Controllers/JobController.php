@@ -29,6 +29,7 @@ class JobController extends Controller
         if ($job->company_id !== $user->company_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+        Cache::tags(['public_jobs'])->flush();
 
         $job->delete();
 
@@ -43,6 +44,7 @@ class JobController extends Controller
         }
 
         $job->delete();
+        Cache::tags(['public_jobs'])->flush();
 
         return response()->json(['message' => 'Job deleted without ownership check']);
     }
@@ -58,10 +60,10 @@ class JobController extends Controller
 
     public function publicIndex(Request $request)
     {
-        $cacheKey = 'public_jobs_' . md5(json_encode($request->all()));
+        $cacheKey = md5(json_encode($request->all()));
         $cacheTime = 600;
 
-        $jobs = Cache::remember($cacheKey, $cacheTime, function () use ($request) {
+        $jobs = Cache::tags(['public_jobs'])->remember($cacheKey, $cacheTime, function () use ($request) {
             $query = Job::with([
                 'questions.options',
                 'company.subscriptions' => function ($q) {
@@ -140,20 +142,6 @@ class JobController extends Controller
             return $query->paginate($perPage);
         });
 
-        $jobs->getCollection()->transform(function ($job) {
-            $company = $job->company;
-            $isPremium = false;
-
-            if ($company && $company->subscriptions->isNotEmpty()) {
-                $latestSub = $company->subscriptions->first();
-                if ($latestSub->end_date && \Carbon\Carbon::parse($latestSub->end_date)->isFuture()) {
-                    $isPremium = true;
-                }
-            }
-
-            $job->company->isPremium = $isPremium;
-            return $job;
-        });
 
         return response()->json($jobs);
     }
@@ -194,6 +182,7 @@ class JobController extends Controller
 
     public function index(Request $request)
     {
+
         $companyUser = auth()->user();
 
         if (!$companyUser || !$companyUser->company_id) {
@@ -322,6 +311,7 @@ class JobController extends Controller
             }
 
             DB::commit();
+            Cache::tags(['public_jobs'])->flush();
 
             return response()->json([
                 'message' => 'Job created successfully.',
@@ -465,6 +455,7 @@ class JobController extends Controller
             }
 
             DB::commit();
+            Cache::tags(['public_jobs'])->flush();
 
             return response()->json([
                 'message' => 'Job updated successfully.',

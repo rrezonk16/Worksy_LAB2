@@ -2,18 +2,18 @@
 
 namespace App\Events;
 
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TestNotification implements ShouldBroadcast
+class StatusUpdatedNotification implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $message;
     public $user_id;
+    public $message;
 
     public function __construct($user_id, $message)
     {
@@ -21,14 +21,20 @@ class TestNotification implements ShouldBroadcast
         $this->message = $message;
     }
 
-public function broadcastOn()
-{
-    return new PrivateChannel('user.' . $this->user_id);
-}
+
+    public function broadcastOn()
+    {
+        return new PrivateChannel('user.' . $this->user_id);
+    }
 
 
     public function broadcastWith()
     {
         return ['message' => $this->message];
+    }
+
+    public function broadcastAs()
+    {
+        return 'status.updated';
     }
 }

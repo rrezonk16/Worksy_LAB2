@@ -1,1 +1,9 @@
 public/storage
+node_modules
+vendor
+.env
+docker-compose.yml
+Dockerfile
+*.log
+tests
+.git

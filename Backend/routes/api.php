@@ -1,5 +1,7 @@
 <?php
 
+
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -18,6 +20,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\JobApplicationStatusController;
 use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Broadcast;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,7 +28,13 @@ use App\Http\Controllers\NotificationController;
 |--------------------------------------------------------------------------
 | These routes do not require authentication
 */
-
+Broadcast::routes(attributes: ['middleware' => ['auth:sanctum']]);
+Route::get('/broadcasting/auth', function (Request $request) {
+    return Broadcast::auth($request);
+});
+Route::post('/broadcasting/auth', function (Request $request) {
+    return Broadcast::auth($request);
+});
 // Auth
 Route::post('register/user', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);
@@ -49,12 +58,13 @@ Route::get('/api/jobs/{id}', [JobController::class, 'show']);
 // Past Jobs (Public access by user ID)
 Route::get('user/{userId}/past-jobs', [PastJobController::class, 'getByUserId']);
 
-Route::post('send-notification', [NotificationController::class, 'sendNotification']);
+Route::post('/send-notification', [NotificationController::class, 'sendNotification']);
 /*
 |--------------------------------------------------------------------------
 | PROTECTED ROUTES (AUTHENTICATED via Sanctum)
 |--------------------------------------------------------------------------
 */
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
@@ -109,7 +119,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
     Route::put('/job-apply/{applicationId}', [JobApplicationController::class, 'updateApplication']);
     Route::post('/schedule-interview', [JobApplicationStatusController::class, 'schedule']);
-
+Route::put('/job-applications/{id}/status', [JobApplicationStatusController::class, 'updateStatus']);
+    
     // Subscription
     Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);
     Route::post('/subscribe-premium', [SubscriptionController::class, 'store']);

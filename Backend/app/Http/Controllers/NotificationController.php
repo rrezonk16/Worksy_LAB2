@@ -3,37 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Pusher\Pusher;
+use App\Events\UserNotification;
 
 class NotificationController extends Controller
 {
     public function sendNotification(Request $request)
     {
-        // Validate the incoming request
-        $request->validate([
+        $validated = $request->validate([
+            'user_id' => 'required|integer',
             'message' => 'required|string',
         ]);
 
-        // Pusher configuration
-        $pusher = new Pusher(
-            env('PUSHER_APP_KEY'),
-            env('PUSHER_APP_SECRET'),
-            env('PUSHER_APP_ID'),
-            [
-                'cluster' => env('PUSHER_APP_CLUSTER'),
-                'useTLS' => true,
-            ]
-        );
+        // Fire the event to broadcast the notification to the user with ID
+        event(new UserNotification($validated['user_id'], $validated['message']));
 
-        // Prepare data to send
-        $data = [
-            'message' => $request->message,
-        ];
-
-        // Trigger the event on the specified channel
-        $pusher->trigger('notifications', 'TestNotification', $data);
-
-        // Return a response indicating success
         return response()->json(['status' => 'Notification sent successfully']);
     }
 }

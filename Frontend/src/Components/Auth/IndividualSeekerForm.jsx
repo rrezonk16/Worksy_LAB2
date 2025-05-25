@@ -19,6 +19,7 @@ const IndividualSeekerForm = () => {
     role_id: 1,
     acceptedTerms: false,
   });
+  const [loading, setLoading] = useState(false);
 
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState({}); // State to hold errors
@@ -39,6 +40,7 @@ const IndividualSeekerForm = () => {
   };
 
   const handleSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     setErrors({}); // Reset errors on form submit
 
@@ -48,6 +50,7 @@ const IndividualSeekerForm = () => {
       localStorage.setItem("token", response.data.token);
       localStorage.setItem("user", JSON.stringify(response.data.user));
       if (response.status === 201) {
+        setLoading(true);
         navigate("/profile", {
           state: {
             name: formData.name,
@@ -210,14 +213,29 @@ const IndividualSeekerForm = () => {
                   I accept the <a href="/terms" className="text-blue-500">Terms and Conditions</a>
                 </label>
               </div>
-
-              <button
+              {errors.acceptedTerms && (
+                <p className="text-red-500 text-sm mt-1">{errors.acceptedTerms[0]}</p> // Display terms error in red
+              )} 
+              {loading ? (
+                     <button
                 type="submit"
+           
+                className="w-full px-6 py-3 bg-blue-300 text-white font-semibold rounded-lg  transition"
+                disabled={!formData.acceptedTerms}
+              >
+                Registering...
+              </button>
+              ) : (
+                 <button
+                type="submit"
+                onClick={handleSubmit}
                 className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
                 disabled={!formData.acceptedTerms}
               >
                 Register
               </button>
+              )}   
+         
             </>
           )}
         </form>

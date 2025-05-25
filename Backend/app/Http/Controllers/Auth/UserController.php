@@ -19,47 +19,47 @@ class UserController extends Controller
 {
 
     public function changePassword(Request $request)
-{
-    $user = auth()->user();
+    {
+        $user = auth()->user();
 
-    $validator = Validator::make($request->all(), [
-        'current_password' => 'required',
-        'new_password' => 'required|min:6|confirmed',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return response()->json(['message' => 'Current password is incorrect'], 403);
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully']);
     }
 
-    if (!Hash::check($request->current_password, $user->password)) {
-        return response()->json(['message' => 'Current password is incorrect'], 403);
+    public function uploadCV(Request $request)
+    {
+        $request->validate([
+            'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+        ]);
+
+        $user = auth()->user();
+
+        $path = $request->file('cv')->store('public/cvs');
+
+        $cvUrl = Storage::url($path);
+
+        $details = UserDetail::updateOrCreate(
+            ['user_id' => $user->id],
+            ['resume_link_to_file' => $cvUrl]
+        );
+
+        return response()->json(['message' => 'CV uploaded successfully', 'cv_url' => $cvUrl]);
     }
-
-    $user->password = Hash::make($request->new_password);
-    $user->save();
-
-    return response()->json(['message' => 'Password changed successfully']);
-}
-
-public function uploadCV(Request $request)
-{
-    $request->validate([
-        'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-    ]);
-
-    $user = auth()->user();
-
-    $path = $request->file('cv')->store('public/cvs');
-
-    $cvUrl = Storage::url($path);
-
-    $details = UserDetail::updateOrCreate(
-        ['user_id' => $user->id],
-        ['resume_link_to_file' => $cvUrl]
-    );
-
-    return response()->json(['message' => 'CV uploaded successfully', 'cv_url' => $cvUrl]);
-}
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -84,7 +84,7 @@ public function uploadCV(Request $request)
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'phone_number' => $request->phone_number,
-            'role_id' => $roleId, 
+            'role_id' => $roleId,
         ]);
 
         $userDetail = UserDetail::create([
@@ -99,17 +99,14 @@ public function uploadCV(Request $request)
         ]);
 
         $token = $user->createToken('Worksy')->plainTextToken;
-        Mail::to($user->email)->send(new WelcomeUserMail($user));
-        
+        Mail::to($user->email)->queue(new WelcomeUserMail($user));
+
         return response()->json([
             'message' => 'User registered successfully!',
             'token' => $token,
             'user' => $user,
             'user_detail' => $userDetail,
         ], 201);
-
-
-
     }
     public function updateUserDetails(Request $request)
     {
@@ -185,19 +182,19 @@ public function uploadCV(Request $request)
     public function getMyDetails()
     {
         $user = Auth::user();
-    
+
         if (!$user) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-    
+
         $user = User::with(['role', 'details', 'role.permissions'])->find($user->id);
-    
+
         return response()->json([
             'message' => 'User retrieved successfully!',
             'user' => $user
         ], 200);
     }
-    
+
     public function getMyPermissions()
     {
         $user = Auth::user();
@@ -212,18 +209,18 @@ public function uploadCV(Request $request)
 
 
     public function getUserById($id)
-{
-    $user = User::with(['role', 'details'])->find($id);
+    {
+        $user = User::with(['role', 'details'])->find($id);
 
-    if (!$user) {
-        return response()->json(['message' => 'User not found.'], 404);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        return response()->json([
+            'message' => 'User retrieved successfully!',
+            'user' => $user
+        ], 200);
     }
-
-    return response()->json([
-        'message' => 'User retrieved successfully!',
-        'user' => $user
-    ], 200);
-}
 
     public function getAllUsers()
     {
@@ -244,18 +241,18 @@ public function uploadCV(Request $request)
     }
 
     public function getUserWithDetailsById($id)
-{
-    $user = User::with(['role', 'details'])->find($id);
+    {
+        $user = User::with(['role', 'details'])->find($id);
 
-    if (!$user) {
-        return response()->json(['message' => 'User not found.'], 404);
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        return response()->json([
+            'message' => 'User and details retrieved successfully!',
+            'user' => $user
+        ], 200);
     }
-
-    return response()->json([
-        'message' => 'User and details retrieved successfully!',
-        'user' => $user
-    ], 200);
-}
 
 
     public function logout(Request $request)
@@ -321,39 +318,38 @@ public function uploadCV(Request $request)
 
         return response()->json(['message' => 'User soft deleted successfully!'], 200);
     }
-    
+
     public function updateMyUserData(Request $request)
-{
-    $user = User::find(Auth::id()); 
+    {
+        $user = User::find(Auth::id());
 
-    if (!$user) {
-        return response()->json(['message' => 'User not found'], 404);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'surname' => 'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'phone_number' => 'nullable|string|max:15',
+            'password' => 'nullable|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $user->update([
+            'name' => $request->name ?? $user->name,
+            'surname' => $request->surname ?? $user->surname,
+            'email' => $request->email ?? $user->email,
+            'phone_number' => $request->phone_number ?? $user->phone_number,
+            'password' => $request->password ? Hash::make($request->password) : $user->password,
+        ]);
+
+        return response()->json([
+            'message' => 'User data updated successfully!',
+            'user' => $user
+        ], 200);
     }
-
-    $validator = Validator::make($request->all(), [
-        'name' => 'nullable|string|max:255',
-        'surname' => 'nullable|string|max:255',
-        'email' => 'nullable|email|unique:users,email,' . $user->id,
-        'phone_number' => 'nullable|string|max:15',
-        'password' => 'nullable|string|min:8|confirmed',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    $user->update([
-        'name' => $request->name ?? $user->name,
-        'surname' => $request->surname ?? $user->surname,
-        'email' => $request->email ?? $user->email,
-        'phone_number' => $request->phone_number ?? $user->phone_number,
-        'password' => $request->password ? Hash::make($request->password) : $user->password,
-    ]);
-
-    return response()->json([
-        'message' => 'User data updated successfully!',
-        'user' => $user
-    ], 200);
-}
-
 }
