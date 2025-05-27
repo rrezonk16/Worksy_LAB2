@@ -15,7 +15,8 @@ class DatabaseSeeder extends Seeder
             CompanyRolesSeeder::class,     // Seeder for company-specific roles
             UserSeeder::class,
             SubscriptionFeaturesSeeder::class,
-
+            CountryCitySeeder::class
+            
         ]);
     }
 }

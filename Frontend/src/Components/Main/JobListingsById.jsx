@@ -5,6 +5,7 @@ import Navbar from "../Navigation/Navbar";
 import Footer from "../Navigation/Footer";
 import gsap from "gsap";
 import { FaLinkedinIn, FaFacebookF, FaTwitter } from "react-icons/fa";
+import isLoggedIn from "../Functions/isLoggedIn";
 
 const JobListingsById = () => {
   const { id } = useParams();
@@ -51,13 +52,13 @@ const JobListingsById = () => {
   // }
 
   const handleSubmit = async (e) => {
-  // if ("Notification" in window && Notification.permission !== "granted") {
-  //   Notification.requestPermission().then(permission => {
-  //     if (permission === "granted") {
-  //       notifications("Notifications Enabled", "You’ll receive updates here.");
-  //     }
-  //   });
-  // }
+    // if ("Notification" in window && Notification.permission !== "granted") {
+    //   Notification.requestPermission().then(permission => {
+    //     if (permission === "granted") {
+    //       notifications("Notifications Enabled", "You’ll receive updates here.");
+    //     }
+    //   });
+    // }
     e.preventDefault();
     const token = localStorage.getItem("token");
     if (!token) {
@@ -135,32 +136,31 @@ const JobListingsById = () => {
   }
 
   const { details, company } = job;
-// const sendTestNotification = () => {
-//   axios.post('http://localhost:8000/api/send-notification', {
-//     message: 'This is a test notification!'
-//   })
-//   .then((response) => {
-//     console.log('Notification sent successfully:', response.data);
-//   })
-//   .catch((error) => {
-//     console.error('Error sending notification:', error);
-//   });
-// };
+  // const sendTestNotification = () => {
+  //   axios.post('http://localhost:8000/api/send-notification', {
+  //     message: 'This is a test notification!'
+  //   })
+  //   .then((response) => {
+  //     console.log('Notification sent successfully:', response.data);
+  //   })
+  //   .catch((error) => {
+  //     console.error('Error sending notification:', error);
+  //   });
+  // };
 
-
-// const sendTestNotification2 = () => {
-//   if (Notification.permission === "granted") {
-//     new Notification("Test Notification", {
-//       body: "This is a test notification",
-//     });
-//   }
-// };
-
+  // const sendTestNotification2 = () => {
+  //   if (Notification.permission === "granted") {
+  //     new Notification("Test Notification", {
+  //       body: "This is a test notification",
+  //     });
+  //   }
+  // };
+  const loggedIn = isLoggedIn();
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
-{/* <button onClick={sendTestNotification}>Send Test Notification</button>
+      {/* <button onClick={sendTestNotification}>Send Test Notification</button>
 <button onClick={sendTestNotification2}>Send Test Notification</button> */}
 
       <div
@@ -314,88 +314,90 @@ const JobListingsById = () => {
               </a>
             </div>
           </div>
-          <div className="mt-14">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-              Application Questions
-            </h2>
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {job.questions.map((q, index) => (
-                <div
-                  key={index}
-                  className="p-4 border rounded bg-white shadow-sm"
-                >
-                  <label className="block font-medium text-gray-700 mb-3">
-                    {q.question_text}
-                  </label>
+          {loggedIn && (
+            <div className="mt-14">
+              <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+                Application Questions
+              </h2>
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                {job.questions.map((q, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border rounded bg-white shadow-sm"
+                  >
+                    <label className="block font-medium text-gray-700 mb-3">
+                      {q.question_text}
+                    </label>
 
-                  {q.input_type === "yesno" ? (
-                    <div className="flex items-center gap-6">
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name={`question_${q.id}`}
-                          value="Yes"
-                          required={q.is_required}
-                          onChange={() => handleChange(q.id, "Yes")}
-                          className="form-radio text-indigo-600"
-                        />
-                        <span>Yes</span>
-                      </label>
-                      <label className="flex items-center space-x-2">
-                        <input
-                          type="radio"
-                          name={`question_${q.id}`}
-                          value="No"
-                          required={q.is_required}
-                          onChange={() => handleChange(q.id, "No")}
-                          className="form-radio text-indigo-600"
-                        />
-                        <span>No</span>
-                      </label>
-                    </div>
-                  ) : q.input_type === "select" ? (
-                    <select
-                      className="w-full border rounded px-3 py-2"
-                      required={q.is_required}
-                      onChange={(e) => handleChange(q.id, e.target.value)}
-                    >
-                      <option value="">Select an option</option>
-                      {q.options.map((opt, idx) => (
-                        <option key={idx} value={opt.option_text}>
-                          {opt.option_text}
-                        </option>
-                      ))}
-                    </select>
-                  ) : q.input_type === "file" ? (
-                    <input
-                      type="file"
-                      required={q.is_required}
-                      onChange={(e) => handleChange(q.id, e.target.files[0])}
-                      className="w-full border rounded px-3 py-2"
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      className="w-full border rounded px-3 py-2"
-                      required={q.is_required}
-                      onChange={(e) => handleChange(q.id, e.target.value)}
-                      placeholder="Your answer"
-                    />
-                  )}
+                    {q.input_type === "yesno" ? (
+                      <div className="flex items-center gap-6">
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            name={`question_${q.id}`}
+                            value="Yes"
+                            required={q.is_required}
+                            onChange={() => handleChange(q.id, "Yes")}
+                            className="form-radio text-indigo-600"
+                          />
+                          <span>Yes</span>
+                        </label>
+                        <label className="flex items-center space-x-2">
+                          <input
+                            type="radio"
+                            name={`question_${q.id}`}
+                            value="No"
+                            required={q.is_required}
+                            onChange={() => handleChange(q.id, "No")}
+                            className="form-radio text-indigo-600"
+                          />
+                          <span>No</span>
+                        </label>
+                      </div>
+                    ) : q.input_type === "select" ? (
+                      <select
+                        className="w-full border rounded px-3 py-2"
+                        required={q.is_required}
+                        onChange={(e) => handleChange(q.id, e.target.value)}
+                      >
+                        <option value="">Select an option</option>
+                        {q.options.map((opt, idx) => (
+                          <option key={idx} value={opt.option_text}>
+                            {opt.option_text}
+                          </option>
+                        ))}
+                      </select>
+                    ) : q.input_type === "file" ? (
+                      <input
+                        type="file"
+                        required={q.is_required}
+                        onChange={(e) => handleChange(q.id, e.target.files[0])}
+                        className="w-full border rounded px-3 py-2"
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        className="w-full border rounded px-3 py-2"
+                        required={q.is_required}
+                        onChange={(e) => handleChange(q.id, e.target.value)}
+                        placeholder="Your answer"
+                      />
+                    )}
+                  </div>
+                ))}
+
+                <div className="text-right">
+                  <button
+                    type="submit"
+                    className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition"
+                    disabled={isSubmitting}
+                  >
+                    Apply Now
+                  </button>
                 </div>
-              ))}
-
-              <div className="text-right">
-                <button
-                  type="submit"
-                  className="mt-4 bg-indigo-600 text-white px-6 py-2 rounded-full hover:bg-indigo-700 transition"
-                  disabled={isSubmitting}
-                >
-                  Apply Now
-                </button>
-              </div>
-            </form>
-          </div>
+              </form>
+            </div>
+          )}
         </section>
       </main>
 

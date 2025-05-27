@@ -41,10 +41,8 @@ RUN composer install --no-scripts --no-autoloader
 # Copy application files
 COPY . .
 
-# Re-run autoload (after all app files are copied)
 RUN composer dump-autoload
 
-# Set file permissions (Laravel friendly)
 RUN chown -R www-data:www-data /var/www \
     && chmod -R 755 /var/www \
     && chmod -R 775 storage bootstrap/cache
@@ -53,3 +51,4 @@ RUN chown -R www-data:www-data /var/www \
 EXPOSE 9000
 
 CMD ["php-fpm"]
+

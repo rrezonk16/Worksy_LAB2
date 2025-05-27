@@ -67,7 +67,7 @@ class JobController extends Controller
             $query = Job::with([
                 'questions.options',
                 'company.subscriptions' => function ($q) {
-                    $q->orderByDesc('end_date')->limit(1); // Only get the latest subscription
+                    $q->orderByDesc('end_date')->limit(1);
                 },
                 'details'
             ]);
@@ -149,13 +149,13 @@ class JobController extends Controller
 
 
 
-
     public function publicShow($id)
     {
         $job = Job::with([
             'questions.options',
             'company',
-            'details'
+            'details.country',
+            'details.city',
         ])->findOrFail($id);
 
         return response()->json([
@@ -238,6 +238,8 @@ class JobController extends Controller
             'benefits' => 'nullable|array',
             'benefits.*' => 'string',
             'deadline' => 'nullable|date',
+            'city_id' => 'nullable|exists:cities,id',
+            'country_id' => 'nullable|exists:countries,id', 
         ]);
 
         try {

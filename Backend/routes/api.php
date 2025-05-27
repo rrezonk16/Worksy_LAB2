@@ -20,7 +20,7 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ApiLogController;
 use App\Http\Controllers\JobApplicationStatusController;
 use App\Http\Controllers\NotificationController;
-use Illuminate\Support\Facades\Broadcast;
+use App\Http\Controllers\LocationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,13 +28,12 @@ use Illuminate\Support\Facades\Broadcast;
 |--------------------------------------------------------------------------
 | These routes do not require authentication
 */
-Broadcast::routes(attributes: ['middleware' => ['auth:sanctum']]);
-Route::get('/broadcasting/auth', function (Request $request) {
-    return Broadcast::auth($request);
-});
-Route::post('/broadcasting/auth', function (Request $request) {
-    return Broadcast::auth($request);
-});
+
+
+
+Route::get('/countries', [LocationController::class, 'getCountries']);
+Route::get('/countries/{id}/cities', [LocationController::class, 'getCitiesByCountry']);
+
 // Auth
 Route::post('register/user', [UserController::class, 'register']);
 Route::post('login', [UserController::class, 'login']);

@@ -14,6 +14,7 @@ use App\Models\UserDetail;
 use App\Mail\WelcomeUserMail;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -41,25 +42,30 @@ class UserController extends Controller
         return response()->json(['message' => 'Password changed successfully']);
     }
 
-    public function uploadCV(Request $request)
-    {
-        $request->validate([
-            'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-        ]);
+public function uploadCV(Request $request)
+{
+    $request->validate([
+        'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+    ]);
 
-        $user = auth()->user();
+    $user = auth()->user();
 
-        $path = $request->file('cv')->store('public/cvs');
+    $file = $request->file('cv');
+    $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+    $path = $file->storeAs('cvs', $filename);
 
-        $cvUrl = Storage::url($path);
+    $relativePath = '/storage/cvs/' . $filename;
 
-        $details = UserDetail::updateOrCreate(
-            ['user_id' => $user->id],
-            ['resume_link_to_file' => $cvUrl]
-        );
+    UserDetail::updateOrCreate(
+        ['user_id' => $user->id],
+        ['resume_link_to_file' => $relativePath]
+    );
 
-        return response()->json(['message' => 'CV uploaded successfully', 'cv_url' => $cvUrl]);
-    }
+    return response()->json([
+        'message' => 'CV uploaded successfully',
+        'cv_url' => $relativePath
+    ]);
+}
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [

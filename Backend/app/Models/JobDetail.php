@@ -18,6 +18,8 @@ class JobDetail extends Model
         'hashtags',
         'benefits',
         'deadline',
+        'country_id',
+        'city_id',
     ];
 
     protected $casts = [
@@ -29,5 +31,15 @@ class JobDetail extends Model
     public function job()
     {
         return $this->belongsTo(Job::class);
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 }
