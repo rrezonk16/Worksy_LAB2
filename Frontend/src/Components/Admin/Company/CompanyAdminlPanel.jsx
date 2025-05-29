@@ -65,7 +65,7 @@ const CompanyAdminPanel = () => {
   return (
     <div className="flex">
       {/* Navbar */}
-      <nav className="fixed top-0 z-50 w-full bg-gray-500 text-white p-4 shadow-md flex items-center">
+      <nav className="fixed top-0 z-50 w-full bg-blue-500 text-white p-4 shadow-md flex items-center">
         <button
           onClick={() => setSidebarOpen(!isSidebarOpen)}
           className="text-white p-2 rounded-md sm:hidden"

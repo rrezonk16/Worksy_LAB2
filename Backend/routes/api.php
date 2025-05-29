@@ -18,6 +18,7 @@ use App\Http\Controllers\UserDetailController;
 use App\Http\Controllers\PastJobController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\ApiLogController;
+use App\Http\Controllers\InterviewMeetingController;
 use App\Http\Controllers\JobApplicationStatusController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\LocationController;
@@ -98,7 +99,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/company-verification/{companyId}/refuse', [CompanyVerificationController::class, 'refuseVerification']);
     Route::post('/apply-for-verification', [CompanyVerificationController::class, 'applyForVerification']);
     Route::post('/company-users', [CompanyUserLoginController::class, 'createUser']);
-   Route::get('/company-users', [CompanyUserLoginController::class, 'getAllUsers']);
+    Route::get('/company-users', [CompanyUserLoginController::class, 'getAllUsers']);
     Route::put('/company-users/{id}', [CompanyUserLoginController::class, 'updateUser']);
     Route::delete('/company-users/{id}', [CompanyUserLoginController::class, 'deleteUser']);
     Route::put('/company-users/{id}/password', [CompanyUserLoginController::class, 'changePassword']);
@@ -118,8 +119,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/applications/{id}', [JobApplicationController::class, 'getApplicationById']);
     Route::put('/job-apply/{applicationId}', [JobApplicationController::class, 'updateApplication']);
     Route::post('/schedule-interview', [JobApplicationStatusController::class, 'schedule']);
-Route::put('/job-applications/{id}/status', [JobApplicationStatusController::class, 'updateStatus']);
-    
+    Route::put('/job-applications/{id}/status', [JobApplicationStatusController::class, 'updateStatus']);
+    Route::post('/interview-meetings', [InterviewMeetingController::class, 'store']);
+    Route::get('/interview-meetings/{application_id}', [InterviewMeetingController::class, 'getByApplicationId']);
+
     // Subscription
     Route::get('/subscription', [SubscriptionController::class, 'getSubscriptionByCompanyUser']);
     Route::post('/subscribe-premium', [SubscriptionController::class, 'store']);

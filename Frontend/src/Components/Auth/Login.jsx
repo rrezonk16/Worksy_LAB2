@@ -28,6 +28,7 @@ const Login = () => {
 
       if (response.status === 200) {
         const data = response.data;
+        console.log("Login successful:", data);
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("permissions", JSON.stringify(data.permissions));

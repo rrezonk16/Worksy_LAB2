@@ -23,6 +23,8 @@ const ApplicationsDetails = () => {
         },
       })
       .then((response) => {
+        console.log(response.data);
+        
         setApplication(response.data.application);
         setLoading(false);
       })
@@ -96,8 +98,7 @@ const ApplicationsDetails = () => {
             <h2 className="text-xl font-semibold">Company: {company.name}</h2>
             <p>Email: {company.email}</p>
             <p>Phone: {company.phone_number}</p>
-            <p>Locations: {company.njesia.join(", ")}</p>
-            <p>Activities: {company.activities.join(", ")}</p>
+
           </div>
 
           <div className="mb-6">

@@ -1,13 +1,13 @@
 <?php
 
-
 namespace App\Models;
+
 
 use Illuminate\Database\Eloquent\Model;
 
-class Interview extends Model
+class InterviewMeeting extends Model
 {
-    protected $fillable = ['job_application_id', 'date', 'start_time', 'end_time'];
+    protected $fillable = ['job_application_id', 'room_name', 'scheduled_at'];
 
     public function jobApplication()
     {

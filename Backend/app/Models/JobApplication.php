@@ -18,10 +18,11 @@ class JobApplication extends Model
     {
         return $this->belongsTo(User::class);
     }
-public function interview()
-{
-    return $this->hasOne(Interview::class);
-}
+    public function interview_meeting()
+    {
+        return $this->hasOne(InterviewMeeting::class);
+    }
+
 
     public function answers()
     {

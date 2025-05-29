@@ -33,6 +33,7 @@ const CompanyPanelLogin = () => {
       
       localStorage.setItem("company_user_token", token);
       localStorage.setItem("company_name", response.data.user.company.name);
+localStorage.setItem("company_user", JSON.stringify(response.data.user));
 
       if (company_verification_status === "pending") {
         navigate("/company/verify");

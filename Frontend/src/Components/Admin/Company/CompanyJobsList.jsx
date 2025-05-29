@@ -6,9 +6,9 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
+import Talk from "talkjs";
 
 import double_tap from "../../../assets/tap.png";
-import { set } from "date-fns";
 import SendInterviewInviteModal from "./SendInterviewInviteModal";
 const CompanyJobsList = () => {
   const [jobs, setJobs] = useState([]);
@@ -20,6 +20,8 @@ const CompanyJobsList = () => {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [selectedAppId, setSelectedAppId] = useState(null);
+  const companyUser = JSON.parse(localStorage.getItem("company_user"));
+
   useEffect(() => {
     const fetchJobs = async () => {
       const token = localStorage.getItem("company_user_token");
@@ -34,6 +36,7 @@ const CompanyJobsList = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         setJobs(response.data.jobs);
+        console.log(response.data.applications);
       } catch {
         setError("Failed to fetch jobs");
       } finally {
@@ -56,6 +59,8 @@ const CompanyJobsList = () => {
         }
       );
       setSelectedJob(job);
+      console.log(res.data.applications);
+
       setApplications(res.data.applications);
     } catch {
       setError("Failed to fetch applications");
@@ -64,20 +69,19 @@ const CompanyJobsList = () => {
 
   const handleBack = () => {
     setSelectedJob(null);
+    console.log(applications);
+
     setApplications([]);
   };
 
   const handleDeleteJob = async () => {
-    // Ensure a job is selected
     if (!selectedJob) {
       setError("No job selected");
       return;
     }
 
-    // Get token from localStorage
     const token = localStorage.getItem("company_user_token");
 
-    // Check if token exists
     if (!token) {
       setError("No token found");
       return;
@@ -136,6 +140,38 @@ const CompanyJobsList = () => {
 
   const onGridReady = (params) => params.api.sizeColumnsToFit();
 
+  const openChat = (app) => {
+    const me = new Talk.User({
+      id: `publisher_${app.job.company_id}`,
+      name: companyUser.name,
+      email: companyUser.email,
+      photoUrl: companyUser.avatarUrl,
+    });
+
+    const other = new Talk.User({
+      id: `applicant_${app.user.id}`,
+      name: `${app.user.name} ${app.user.surname}`,
+      email: app.user.email,
+      photoUrl: app.user.avatarUrl,
+    });
+
+    const session = new Talk.Session({
+      appId: "tEAW4NLM",
+      me: me,
+    });
+
+    const conversationId = `job_${app.job_id}_applicant_${app.user.id}`;
+    const conversation = session.getOrCreateConversation(conversationId);
+    conversation.setParticipant(me);
+    conversation.setParticipant(other);
+
+    const inbox = session.createPopup(conversation, {
+      keepOpen: false,
+    });
+
+    inbox.mount();
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   if (selectedJob) {
@@ -176,83 +212,112 @@ const CompanyJobsList = () => {
           <p className="text-gray-500">No applications yet.</p>
         ) : (
           applications.map((app) => (
-            <div
-              key={app.id}
-              className="mb-8 p-6 border rounded-lg shadow-sm bg-white"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">
-                    {app.user.name} {app.user.surname}
-                  </h3>
-                  <p className="text-sm text-gray-600">{app.user.email}</p>
-                  <p className="text-sm text-gray-600">
-                    <strong>Phone:</strong> {app.user.phone_number}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <a
-                    href={`/profile/${app.user.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <button className=" cursor-pointer bg-green-700 rounded-2xl p-3 text-white hover:bg-green-600">
-                      {" "}
-                      Open Profile
-                    </button>
-                  </a>
-                  <button
-                    className=" cursor-pointer bg-blue-700 rounded-2xl p-3 text-white hover:bg-blue-600"
-                    onClick={() => {
-                      setSelectedAppId(app.id);
-                      setShowModal(true);
-                    }}
-                  >
-                    <img
-                      src="https://img.icons8.com/ios-filled/24/ffffff/new-post.png"
-                      alt="Send Invite"
-                      className="inline-block mr-2"
-                    />
-                    Send Invite
-                  </button>
-                </div>
-              </div>
+<div
+  key={app.id}
+  className="mb-8 p-6 border rounded-2xl shadow-md bg-white space-y-6"
+>
+  {/* Header: User Info and Actions */}
+  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+      <h3 className="text-xl font-semibold text-gray-800">
+        {app.user.name} {app.user.surname}
+      </h3>
+      <p className="text-sm text-gray-600">{app.user.email}</p>
+      <p className="text-sm text-gray-600">
+        <strong>Phone:</strong> {app.user.phone_number}
+      </p>
+    </div>
 
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Answers:</h4>
-                <ul className="space-y-2">
-                  {app.answers.map((ans) => (
-                    <li key={ans.id} className="bg-gray-50 p-3 rounded border">
-                      <strong className="text-gray-700">
-                        {ans.question.question_text}:
-                      </strong>{" "}
-                      {typeof ans.answer === "string" &&
-                      ans.answer.startsWith("applications/") ? (
-                        <a
-                          href={`http://localhost:8000/storage/${ans.answer}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block ml-2 text-white bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-700 transition"
-                        >
-                          Open File
-                        </a>
-                      ) : (
-                        <span className="text-gray-800">{ans.answer}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+    <div className="flex flex-wrap gap-3">
+      <button
+        className="bg-purple-700 rounded-2xl px-4 py-2 text-white hover:bg-purple-600 transition"
+        onClick={() => openChat(app)}
+      >
+        Message
+      </button>
+      <a
+        href={`/profile/${app.user.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <button className="bg-green-700 rounded-2xl px-4 py-2 text-white hover:bg-green-600 transition">
+          Open Profile
+        </button>
+      </a>
+      <button
+        className="bg-blue-700 rounded-2xl px-4 py-2 text-white hover:bg-blue-600 transition flex items-center gap-2"
+        onClick={() => {
+          setSelectedAppId(app.id);
+          setShowModal(true);
+        }}
+      >
+        <img
+          src="https://img.icons8.com/ios-filled/24/ffffff/new-post.png"
+          alt="Send Invite"
+        />
+        Send Invite
+      </button>
+    </div>
+  </div>
+
+  {/* Meeting Info */}
+  {app.interview_meeting && (
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-50 p-4 rounded-lg border">
+      <p className="text-sm text-gray-700">
+        <strong>Interview Scheduled at:</strong>{" "}
+        {new Date(app.interview_meeting.scheduled_at).toLocaleString()}
+      </p>
+      <button
+        className="mt-2 sm:mt-0 bg-blue-600 rounded-xl px-4 py-2 text-white hover:bg-blue-500 transition"
+        onClick={() =>
+          window.open(
+            `https://meet.jit.si/${app.interview_meeting.room_name}`,
+            "_blank"
+          )
+        }
+      >
+        Start Meet
+      </button>
+    </div>
+  )}
+
+  {/* Answers Section */}
+  <div>
+    <h4 className="font-medium text-gray-700 mb-3">Answers:</h4>
+    <ul className="space-y-3">
+      {app.answers.map((ans) => (
+        <li key={ans.id} className="bg-gray-50 p-4 rounded-lg border">
+          <strong className="text-gray-700">
+            {ans.question.question_text}:
+          </strong>{" "}
+          {typeof ans.answer === "string" &&
+          ans.answer.startsWith("applications/") ? (
+            <a
+              href={`http://localhost:8000/storage/${ans.answer}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block ml-2 text-white bg-indigo-600 px-3 py-1 rounded hover:bg-indigo-700 transition"
+            >
+              Open File
+            </a>
+          ) : (
+            <span className="text-gray-800">{ans.answer}</span>
+          )}
+        </li>
+      ))}
+    </ul>
+  </div>
+</div>
+
           ))
         )}
-          {showModal && (
-        <SendInterviewInviteModal
-          applicationId={selectedAppId}
-          onClose={() => setShowModal(false)}
-          onSuccess={() => {}}
-        />
-      )}
+        {showModal && (
+          <SendInterviewInviteModal
+            applicationId={selectedAppId}
+            onClose={() => setShowModal(false)}
+            onSuccess={() => {}}
+          />
+        )}
       </div>
     );
   }
@@ -300,8 +365,6 @@ const CompanyJobsList = () => {
           onRowDoubleClicked={handleRowDoubleClick}
         />
       </div>
-
-    
     </div>
   );
 };

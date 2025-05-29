@@ -8,6 +8,8 @@ use App\Models\JobApplicationAnswer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Job;
+use App\Models\User;
+
 use App\Mail\JobApplicationConfirmationMail;
 use App\Mail\JobApplicationSubmitted;
 use App\Models\Interview;
@@ -16,15 +18,16 @@ use App\Models\JobQuestion;
 class JobApplicationController extends Controller
 {
 
-  
+
 
     public function getUserApplications()
     {
         $user = auth()->user();
 
         $applications = $user->jobApplications()
-            ->with(['job.company', 'answers.question'])
+            ->with(['job.company', 'answers.question', 'interview_meeting'])
             ->get()
+
             ->map(function ($application) {
                 return [
                     'application_id' => $application->id,
@@ -50,6 +53,12 @@ class JobApplicationController extends Controller
                             'question_text' => $answer->question ? $answer->question->question_text : null,
                         ];
                     }),
+
+                    'interview_meeting' => $application->interview_meeting ? [
+                        'id' => $application->interview_meeting->id,
+                        'room_name' => $application->interview_meeting->room_name,
+                        'scheduled_at' => $application->interview_meeting->scheduled_at,
+                    ] : null,
                 ];
             });
 
@@ -229,23 +238,25 @@ class JobApplicationController extends Controller
     }
 
     public function getApplicationsForJob($jobId)
-    {
-        $companyUser = auth()->user();
+{
+    $companyUser = auth()->user();
 
-        $applications = JobApplication::with([
-            'user',
-            'answers.question',
-            'job'
-        ])
-            ->whereHas('job', function ($q) use ($companyUser, $jobId) {
-                $q->where('company_id', $companyUser->company_id)->where('id', $jobId);
-            })
-            ->get();
+    $applications = JobApplication::with([
+        'user',
+        'answers.question',
+        'job',
+        'interview_meeting' 
+    ])
+    ->whereHas('job', function ($q) use ($companyUser, $jobId) {
+        $q->where('company_id', $companyUser->company_id)
+          ->where('id', $jobId);
+    })
+    ->get();
 
-        return response()->json([
-            'applications' => $applications
-        ]);
-    }
+    return response()->json([
+        'applications' => $applications
+    ]);
+}
 
 
     public function updateApplication(Request $request, $applicationId)

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,12 +36,11 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
     public function jobApplications()
-{
-    return $this->hasMany(\App\Models\JobApplication::class, 'user_id');
-}
-public function pastJobs()
-{
-    return $this->hasMany(PastJob::class);
-}
-
+    {
+        return $this->hasMany(\App\Models\JobApplication::class, 'user_id');
+    }
+    public function pastJobs()
+    {
+        return $this->hasMany(PastJob::class);
+    }
 }
