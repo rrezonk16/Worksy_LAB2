@@ -45,7 +45,7 @@ const JobsManager = () => {
 }
 
   const openJobDetails = (id) => {
-    navigate(`/jobs/${id}`)
+    navigate(`/job-listings/${id}`)
   }
 
   const editJob = (id) => {

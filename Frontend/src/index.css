@@ -29,7 +29,8 @@
   }
 
 html {
-  font-family: 'Ubuntu', sans-serif;
+ font-family: "Titillium Web", sans-serif;
+  font-style: normal;
 }
 @media print {
   body * {
@@ -51,4 +52,8 @@ html {
   .no-print {
     display: none !important;
   }
+}
+
+button {
+  cursor: pointer;
 }

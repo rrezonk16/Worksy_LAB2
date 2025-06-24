@@ -34,7 +34,7 @@ const UploadCompanyLogo = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-xl mt-10">
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-xl mt-16">
       <h2 className="text-xl font-bold mb-4 text-center">Upload Company Logo</h2>
       <p className="text-sm text-gray-500 mb-4 text-center">
         Please upload a <span className="font-semibold">PNG</span> image with recommended dimensions of <span className="font-semibold">300x300</span> pixels.

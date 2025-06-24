@@ -21,6 +21,7 @@ const JobListingsById = () => {
           `http://127.0.0.1:8000/api/public/jobs/${id}`
         );
         setJob(response.data.job);
+        console.log("Fetched job:", response.data.job);
       } catch (error) {
         console.error("Failed to fetch job:", error);
       }
@@ -223,6 +224,7 @@ const JobListingsById = () => {
                 <p>
                   <strong>Employment Type:</strong> {details?.employment_type}
                 </p>
+
                 <p>
                   <strong>Experience Level:</strong> {details?.experience_level}
                 </p>
@@ -234,7 +236,13 @@ const JobListingsById = () => {
                   <strong>Contact Email:</strong> {company?.email}
                 </p>
                 <p>
+                  <strong>Country:</strong> {details?.country.name}
+                </p>
+                <p>
                   <strong>Phone Number:</strong> {company?.phone_number}
+                </p>
+                <p>
+                  <strong>City:</strong> {details?.city.name}
                 </p>
               </div>
 

@@ -28,49 +28,44 @@ const JobListings = () => {
 
   const navigate = useNavigate();
 
-  const fetchJobs = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        "http://127.0.0.1:8000/api/public/jobs",
-        {
-          params: {
-            name: searchTerm,
-            city: selectedCity,
-            max_wage: wageRange,
-            min_wage: minWageRange,
-            tag: selectedTag,
-            employment_type: employmentType,
-            experience_level: experienceLevel,
-            benefits: selectedBenefits
-              ? selectedBenefits.split(",").map((b) => b.trim())
-              : undefined,
-            hashtags: selectedHashtags
-              ? selectedHashtags.split(",").map((h) => h.trim())
-              : undefined,
-            deadline,
-            page: currentPage, 
-          },
-        }
-      );
-      console.log(response.data);
+const fetchJobs = async () => {
+  setLoading(true);
+  try {
+    const response = await axios.get("http://127.0.0.1:8000/api/public/jobs", {
+      params: {
+        search: searchTerm || undefined,
+        city: selectedCity || undefined,
+        max_wage: wageRange || undefined,
+        min_wage: minWageRange || undefined,
+        tag: selectedTag || undefined,
+        employment_type: employmentType || undefined,
+        experience_level: experienceLevel || undefined,
+        benefits: selectedBenefits
+          ? selectedBenefits.split(",").map((b) => b.trim())
+          : undefined,
+        hashtags: selectedHashtags
+          ? selectedHashtags.split(",").map((h) => h.trim())
+          : undefined,
+        deadline: deadline || undefined,
+        page: currentPage || 1,
+      },
+    });
 
-      setJobs(response.data.data);
+    const jobData = response.data.data;
 
-      const uniqueCities = [
-        ...new Set(
-          response.data.data?.map((j) => j.details?.location).filter(Boolean)
-        ),
-      ];
-      setCities(uniqueCities);
+    setJobs(jobData);
+    setLastPage(response.data.last_page || 1);
 
-      setLastPage(response.data.last_page); // ✅ Add this to support pagination
-    } catch (error) {
-      console.error("Failed to fetch jobs:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const uniqueCities = [
+      ...new Set(jobData.map((j) => j.details?.location).filter(Boolean)),
+    ];
+    setCities(uniqueCities);
+  } catch (error) {
+    console.error("Failed to fetch jobs:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -78,7 +73,7 @@ const JobListings = () => {
     }, 500);
 
     return () => clearTimeout(delayDebounce);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     searchTerm,
     selectedCity,
@@ -90,8 +85,7 @@ const JobListings = () => {
     selectedBenefits,
     selectedHashtags,
     deadline,
-    currentPage, 
-
+    currentPage,
   ]);
 
   return (
@@ -200,14 +194,14 @@ const JobListings = () => {
                   <h2 className="text-xl font-bold text-gray-800 mb-2 text-center">
                     {job.title}
                   </h2>
-                  {job.company?.isPremium && (
-  <div className="flex justify-center mb-2">
-    <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
-      <span>PREMIUM</span>
-      <span>⭐</span>
-    </span>
-  </div>
-)}
+                  {job.company?.subscriptions?.length > 0 && (
+                    <div className="flex justify-center mb-2">
+                      <span className="bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                        <span>PREMIUM</span>
+                        <span>⭐</span>
+                      </span>
+                    </div>
+                  )}
 
                   <p className="text-gray-600 text-sm mb-3 text-center">
                     {job.description.length > 100
@@ -275,15 +269,15 @@ const JobListings = () => {
               ))}
             </div>
           )}
-       
         </div>
       </div>
       <div className="mb-8 flex justify-center">
-   <Pagination
-            currentPage={currentPage}
-            lastPage={lastPage}
-            setCurrentPage={setCurrentPage}
-          /></div>
+        <Pagination
+          currentPage={currentPage}
+          lastPage={lastPage}
+          setCurrentPage={setCurrentPage}
+        />
+      </div>
       <Footer />
     </div>
   );

@@ -13,9 +13,26 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use App\Events\TestNotification;
+use App\Models\Country;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Request as FacadeRequest; // Add this at the top
 
 class JobController extends Controller
 {
+    public function getJobsByCountry($country)
+    {
+        $countryModel = Country::where('name', $country)->firstOrFail();
+
+        $queryParams = FacadeRequest::query();
+
+        $request = new Request(array_merge($queryParams, [
+            'country_id' => $countryModel->id,
+            'per_page' => 6,
+        ]));
+
+        return $this->publicIndex($request);
+    }
+
 
     public function destroy($id)
     {
@@ -58,6 +75,8 @@ class JobController extends Controller
     }
 
 
+
+
     public function publicIndex(Request $request)
     {
         $cacheKey = md5(json_encode($request->all()));
@@ -72,6 +91,25 @@ class JobController extends Controller
                 'details'
             ]);
 
+            $query->whereHas('details', function ($q) {
+                $q->where('deadline', '>=', Carbon::today());
+            });
+
+            if ($request->filled('search')) {
+                $search = $request->search;
+
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'like', "%{$search}%")
+                        ->orWhereHas('details', function ($q2) use ($search) {
+                            $q2->where('location', 'like', "%{$search}%")
+                                ->orWhere('employment_type', 'like', "%{$search}%")
+                                ->orWhere('experience_level', 'like', "%{$search}%")
+                                ->orWhereJsonContains('benefits', $search)
+                                ->orWhereJsonContains('hashtags', $search);
+                        });
+                });
+            }
+
             if ($request->filled('name')) {
                 $query->where('title', 'like', '%' . $request->name . '%');
             }
@@ -79,6 +117,12 @@ class JobController extends Controller
             if ($request->filled('tag')) {
                 $query->whereHas('details', function ($q) use ($request) {
                     $q->where('tag', 'like', '%' . $request->tag . '%');
+                });
+            }
+
+            if ($request->filled('country_id')) {
+                $query->whereHas('details', function ($q) use ($request) {
+                    $q->where('country_id', $request->country_id);
                 });
             }
 
@@ -142,10 +186,8 @@ class JobController extends Controller
             return $query->paginate($perPage);
         });
 
-
         return response()->json($jobs);
     }
-
 
 
 
@@ -239,7 +281,7 @@ class JobController extends Controller
             'benefits.*' => 'string',
             'deadline' => 'nullable|date',
             'city_id' => 'nullable|exists:cities,id',
-            'country_id' => 'nullable|exists:countries,id', 
+            'country_id' => 'nullable|exists:countries,id',
         ]);
 
         try {
@@ -276,6 +318,8 @@ class JobController extends Controller
                 'hashtags' => $validated['hashtags'] ?? [],
                 'benefits' => $validated['benefits'] ?? [],
                 'deadline' => $validated['deadline'] ?? null,
+                'country_id' => $validated['country_id'] ?? null,
+                'city_id' => $validated['city_id'] ?? null,
             ]);
 
             $allowedInputTypes = ['text', 'yesno', 'file', 'select'];

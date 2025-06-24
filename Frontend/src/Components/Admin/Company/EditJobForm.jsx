@@ -201,7 +201,7 @@ const EditJobForm = () => {
               name="title"
               value={form.title}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               required
             />
           </div>
@@ -213,7 +213,7 @@ const EditJobForm = () => {
             <input
               type="file"
               onChange={handleFileChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -226,7 +226,7 @@ const EditJobForm = () => {
               value={form.description}
               onChange={handleInputChange}
               rows={4}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -239,7 +239,7 @@ const EditJobForm = () => {
               name="wage"
               value={form.wage}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -252,7 +252,7 @@ const EditJobForm = () => {
               name="location"
               value={form.location}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -265,7 +265,7 @@ const EditJobForm = () => {
               name="employment_type"
               value={form.employment_type}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -278,7 +278,7 @@ const EditJobForm = () => {
               name="experience_level"
               value={form.experience_level}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -290,7 +290,7 @@ const EditJobForm = () => {
               type="text"
               value={form.hashtags.join(", ")}
               onChange={(e) => handleArrayChange("hashtags", e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -302,7 +302,7 @@ const EditJobForm = () => {
               type="text"
               value={form.benefits.join(", ")}
               onChange={(e) => handleArrayChange("benefits", e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
 
@@ -315,7 +315,7 @@ const EditJobForm = () => {
               name="deadline"
               value={form.deadline}
               onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm input"
+              className="bg-white border border-gray-300 text-gray-900 text-sm rounded-xl shadow-sm block w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
             />
           </div>
         </div>

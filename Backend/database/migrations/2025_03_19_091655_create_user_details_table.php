@@ -16,7 +16,7 @@ return new class extends Migration
             $table->text('bio')->nullable();
             $table->string('skills_tag')->nullable();
             $table->string('resume_link_to_file')->nullable();
-            $table->json('social_links')->nullable(); // Store social links as a JSON object
+            $table->string('social_links')->nullable(); 
             $table->timestamps();
         });
     }

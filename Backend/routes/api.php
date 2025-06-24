@@ -2,6 +2,7 @@
 
 
 
+use App\Http\Controllers\CompanyProfileController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -34,6 +35,8 @@ use App\Http\Controllers\LocationController;
 
 Route::get('/countries', [LocationController::class, 'getCountries']);
 Route::get('/countries/{id}/cities', [LocationController::class, 'getCitiesByCountry']);
+Route::get('/public/companies/{id}', [CompanyProfileController::class, 'getCompanyById']);
+Route::get('/public/companies', [CompanyProfileController::class, 'getAllCompanies']);
 
 // Auth
 Route::post('register/user', [UserController::class, 'register']);
@@ -45,6 +48,7 @@ Route::post('company-user/login', [CompanyUserLoginController::class, 'login']);
 Route::get('/public/jobs', [JobController::class, 'publicIndex']);
 Route::get('/premium/jobs', [JobController::class, 'premiumPublicJobs']);
 Route::get('/public/jobs/{id}', [JobController::class, 'publicShow']);
+Route::get('/public/jobs/country/{country}', [JobController::class, 'getJobsByCountry']);
 
 // Password Reset
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendCode']);
@@ -80,7 +84,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/upload-resume', [UserController::class, 'uploadCV']);
     // User Management (with permissions)
     Route::get('users', [UserController::class, 'getAllUsers'])->middleware('permission:READ_USERS');
-    Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:READ_USERS');
+    Route::put('users/{id}', [UserController::class, 'updateUser'])->middleware('permission:EDIT_USERS');   
     Route::delete('users/{id}', [UserController::class, 'softDeleteUser'])->middleware('permission:READ_USERS');
     Route::get('/users/{id}/details', [UserController::class, 'getUserWithDetailsById'])->middleware('permission:READ_USERS');
 

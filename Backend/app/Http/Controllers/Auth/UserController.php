@@ -42,30 +42,30 @@ class UserController extends Controller
         return response()->json(['message' => 'Password changed successfully']);
     }
 
-public function uploadCV(Request $request)
-{
-    $request->validate([
-        'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
-    ]);
+    public function uploadCV(Request $request)
+    {
+        $request->validate([
+            'cv' => 'required|file|mimes:pdf,doc,docx|max:5120', // max 5MB
+        ]);
 
-    $user = auth()->user();
+        $user = auth()->user();
 
-    $file = $request->file('cv');
-    $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
-    $path = $file->storeAs('cvs', $filename);
+        $file = $request->file('cv');
+        $filename = Str::uuid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('cvs', $filename);
 
-    $relativePath = '/storage/cvs/' . $filename;
+        $relativePath = '/storage/cvs/' . $filename;
 
-    UserDetail::updateOrCreate(
-        ['user_id' => $user->id],
-        ['resume_link_to_file' => $relativePath]
-    );
+        UserDetail::updateOrCreate(
+            ['user_id' => $user->id],
+            ['resume_link_to_file' => $relativePath]
+        );
 
-    return response()->json([
-        'message' => 'CV uploaded successfully',
-        'cv_url' => $relativePath
-    ]);
-}
+        return response()->json([
+            'message' => 'CV uploaded successfully',
+            'cv_url' => $relativePath
+        ]);
+    }
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -284,6 +284,14 @@ public function uploadCV(Request $request)
             'email' => 'nullable|email|unique:users,email,' . $id,
             'phone_number' => 'nullable|string|max:15',
             'role_id' => 'nullable|exists:roles,id',
+
+            'birthday' => 'nullable|date',
+            'profile_image' => 'nullable|file|mimes:jpg,jpeg,png',
+            'bio' => 'nullable|string|max:1000',
+            'skills_tag' => 'nullable|string|max:500',
+            'resume_link_to_file' => 'nullable|file|mimes:pdf,doc,docx',
+            'social_links' => 'nullable|string|url',
+            'gender' => 'nullable|in:male,female,other',
         ]);
 
         if ($validator->fails()) {
@@ -298,11 +306,28 @@ public function uploadCV(Request $request)
 
         $userToUpdate->update($request->only(['name', 'surname', 'email', 'phone_number', 'role_id']));
 
+        $detailData = $request->only(['birthday', 'bio', 'skills_tag', 'social_links', 'gender']);
+
+        if ($request->hasFile('profile_image')) {
+            $image = $request->file('profile_image')->store('profile_images', 'public');
+            $detailData['profile_image'] = basename($image);
+        }
+
+        if ($request->hasFile('resume_link_to_file')) {
+            $resume = $request->file('resume_link_to_file')->store('resumes', 'public');
+            $detailData['resume_link_to_file'] = basename($resume);
+        }
+
+        $userToUpdate->details()->updateOrCreate(['user_id' => $id], $detailData);
+
+        $userToUpdate->load('details');
+
         return response()->json([
-            'message' => 'User updated successfully!',
+            'message' => 'User and details updated successfully!',
             'user' => $userToUpdate
         ], 200);
     }
+
 
     public function softDeleteUser($id)
     {

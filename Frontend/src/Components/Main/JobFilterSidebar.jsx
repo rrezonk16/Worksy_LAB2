@@ -26,7 +26,7 @@ const JobFilterSidebar = ({
   return (
     <div className="p-4 space-y-6">
       <div>
-        <label className="block text-sm font-medium mb-1">Search by Title</label>
+        <label className="block text-sm font-medium mb-1">Search</label>
         <input
           type="text"
           value={searchTerm}

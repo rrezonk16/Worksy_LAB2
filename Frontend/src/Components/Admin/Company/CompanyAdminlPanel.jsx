@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import logo_icon from "../../../assets/logo_icon.png";
 import CreateJobApplication from "./CreateJobApplication";
 import CompanyJobsList from "./CompanyJobsList";
@@ -51,7 +51,11 @@ const CompanyAdminPanel = () => {
       case "jobs-list":
         return <CompanyJobsList />;
       case "users":
-        return <div className="mt-16"><CompanyUsers/></div>;
+        return (
+          <div className="mt-16">
+            <CompanyUsers />
+          </div>
+        );
       case "profile":
         return <UploadCompanyLogo />;
       case "edit-job":
@@ -59,9 +63,10 @@ const CompanyAdminPanel = () => {
       default:
         return <div>Dashboard</div>;
     }
-  };  
+  };
+  const [searchParams] = useSearchParams();
+  const activeTab = searchParams.get("active-tab");
 
-  
   return (
     <div className="flex">
       {/* Navbar */}
@@ -91,37 +96,59 @@ const CompanyAdminPanel = () => {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } sm:translate-x-0 shadow-md`}
       >
-        <ul className="mt-16">
+        <ul className="mt-16 flex flex-col gap-4">
           <li>
             <button
               onClick={() => navigate("?active-tab=users")}
-              className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+              className={`block w-full text-left p-4 text-lg  border-l-4 cursor-pointer
+      ${
+        activeTab === "users"
+          ? "bg-gray-100 border-purple-600 text-purple-700 shadow-lg font-semibold"
+          : "text-gray-600 hover:bg-gray-200 border-transparent"
+      }`}
             >
               Company Users
             </button>
           </li>
+
           <li>
             <button
               onClick={() => navigate("?active-tab=profile")}
-              className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+             className={`block w-full text-left p-4 text-lg  border-l-4 cursor-pointer
+      ${
+        activeTab === "profile"
+          ? "bg-gray-100 border-purple-600 text-purple-700 shadow-lg font-semibold"
+          : "text-gray-600 hover:bg-gray-200 border-transparent"
+      }`}
             >
-              Profile{" "}
+              Manage Profile
             </button>
           </li>
+
           <li>
             <button
               onClick={() => navigate("?active-tab=jobs-list")}
-              className="block w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer"
+              className={`block w-full text-left p-4 text-lg  border-l-4 cursor-pointer
+      ${
+        activeTab === "jobs-list"
+          ? "bg-gray-100 border-purple-600 text-purple-700 shadow-lg font-semibold"
+          : "text-gray-600 hover:bg-gray-200 border-transparent"
+      }`}
             >
-              All Jobs
+              Manage Jobs
             </button>
           </li>
           <li>
             <button
               onClick={() => navigate("?active-tab=make-job-listing")}
-              className="w-full text-left p-3 rounded-md text-gray-700 hover:bg-gray-200 cursor-pointer flex justify-between"
+               className={`block w-full text-left p-4 text-lg  border-l-4 cursor-pointer
+      ${
+        activeTab === "make-job-listing"
+          ? "bg-gray-100 border-purple-600 text-purple-700 shadow-lg font-semibold"
+          : "text-gray-600 hover:bg-gray-200 border-transparent"
+      }`}
             >
-              Job Listings
+              Create Job Listing
             </button>
           </li>
           <li>

@@ -19,30 +19,31 @@ class CompanyController extends Controller
 {
 
 
-    public function index()
-    {
-        $companies = Company::with(['users', 'verifications', 'roles'])->get();
+public function index()
+{
+    $companies = Company::with(['users', 'verifications', 'roles'])->get();
 
-        $companies->each(function ($company) {
-            if ($company->verifications) {
-                $company->verifications->company_certificate_url = $company->verifications->company_certificate_url
-                    ? asset(Storage::url($company->verifications->company_certificate_url))
-                    : null;
+    $companies->each(function ($company) {
+        if ($company->verifications) {
+            $company->verifications->company_certificate_url = $company->verifications->company_certificate_url
+                ? 'http://localhost:8000/storage/' . ltrim($company->verifications->company_certificate_url, '/')
+                : null;
 
-                $company->verifications->owner_id_front = $company->verifications->owner_id_front
-                    ? asset(Storage::url($company->verifications->owner_id_front))
-                    : null;
+            $company->verifications->owner_id_front = $company->verifications->owner_id_front
+                ? 'http://localhost:8000/storage/' . ltrim($company->verifications->owner_id_front, '/')
+                : null;
 
-                $company->verifications->owner_id_back = $company->verifications->owner_id_back
-                    ? asset(Storage::url($company->verifications->owner_id_back))
-                    : null;
-            }
-        });
+            $company->verifications->owner_id_back = $company->verifications->owner_id_back
+                ? 'http://localhost:8000/storage/' . ltrim($company->verifications->owner_id_back, '/')
+                : null;
+        }
+    });
 
-        return response()->json([
-            'companies' => $companies,
-        ]);
-    }
+    return response()->json([
+        'companies' => $companies,
+    ]);
+}
+
 
 
     public function show($id)
@@ -113,13 +114,12 @@ class CompanyController extends Controller
         $company = $user->company;
 
         if ($request->hasFile('logo')) {
-=            if ($company->logo_url && Storage::disk('public')->exists(str_replace('/storage/', '', $company->logo_url))) {
+            if ($company->logo_url && Storage::disk('public')->exists(str_replace('/storage/', '', $company->logo_url))) {
                 Storage::disk('public')->delete(str_replace('/storage/', '', $company->logo_url));
             }
+            $path = $request->file('logo')->store('logos', 'public');
 
-=            $path = $request->file('logo')->store('logos', 'public');
-
-=            $company->logo_url = '/storage/' . $path;
+            $company->logo_url = '/storage/' . $path;
             $company->save();
         }
 

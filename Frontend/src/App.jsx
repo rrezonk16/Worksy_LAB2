@@ -31,6 +31,8 @@ import ApplicationsDetails from "./Components/Jobs/ApplicationsDetails";
 import MakeCV from "./Components/Admin/User/MakeCV";
 import NotificationReceiver from "./NotificationReceiver"; // NotificationReceiver for pop-up notifications
 import PublicProfile from "./Components/Main/PublicProfile";
+import ContriesJobs from "./Components/Main/Maps/ContriesJobs";
+import CompanyProfile from "./Components/PublicProfile/CompanyProfile";
 
 const routes = [
   {
@@ -120,6 +122,14 @@ const routes = [
   {
     path:"/profile/:id",
     element: <PublicProfile />,
+  },
+  {
+    path: "/jobs/:countryname",
+    element: <ContriesJobs />,
+  },
+  {
+    path: "/companies/:id",
+    element: <CompanyProfile />, 
   },
 ];
 

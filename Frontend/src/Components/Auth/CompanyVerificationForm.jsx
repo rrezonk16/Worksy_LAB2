@@ -37,12 +37,16 @@ const ApplyForVerificationForm = () => {
     formData.append("owner_id_back", files.owner_id_back);
 
     try {
-      await axios.post("http://localhost:8000/api/apply-for-verification", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await axios.post(
+        "http://localhost:8000/api/apply-for-verification",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       setSuccessMessage("Verification request submitted successfully!");
     } catch (error) {
@@ -63,7 +67,9 @@ const ApplyForVerificationForm = () => {
         </h2>
 
         {error && <p className="text-red-500 text-center mt-2">{error}</p>}
-        {successMessage && <p className="text-green-500 text-center mt-2">{successMessage}</p>}
+        {successMessage && (
+          <p className="text-green-500 text-center mt-2">{successMessage}</p>
+        )}
 
         <form className="mt-6" onSubmit={handleSubmit}>
           <div className="grid grid-cols-3 gap-4">
@@ -73,8 +79,13 @@ const ApplyForVerificationForm = () => {
               { name: "owner_id_front", label: "Owner ID (Front)" },
               { name: "owner_id_back", label: "Owner ID (Back)" },
             ].map((file, index) => (
-              <div key={index} className="flex flex-col items-center border border-gray-300 rounded-lg p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition relative">
-                <label className="text-gray-700 font-medium text-center">{file.label}</label>
+              <div
+                key={index}
+                className="flex flex-col items-center border border-gray-300 rounded-lg p-4 bg-gray-50 cursor-pointer hover:bg-gray-100 transition relative"
+              >
+                <label className="text-gray-700 font-medium text-center">
+                  {file.label}
+                </label>
                 <input
                   type="file"
                   name={file.name}
@@ -91,20 +102,28 @@ const ApplyForVerificationForm = () => {
             ))}
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold mt-6 hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Submit Verification"}
-          </button>
+          {successMessage ? (
+            <button
+              type="button"
+              onClick={() => (window.location.href = "/company/panel/login")}
+              className=" cursor-pointer   w-full bg-green-600 text-white p-3 rounded-lg font-semibold mt-6 hover:bg-green-700 transition-all duration-300 transform hover:scale-105"
+            >
+              Go Back to Login
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className=" cursor-pointer   w-full bg-blue-600 text-white p-3 rounded-lg font-semibold mt-6 hover:bg-blue-700 transition-all duration-300 transform hover:scale-105"
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Submit Verification"}
+            </button>
+          )}
         </form>
       </div>
 
       {/* Footer */}
-      <footer className="text-gray-500 text-sm mt-6 pb-4">
-        Worksy © 2025
-      </footer>
+      <footer className="text-gray-500 text-sm mt-6 pb-4">Worksy © 2025</footer>
     </div>
   );
 };

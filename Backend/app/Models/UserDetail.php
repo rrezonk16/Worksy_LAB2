@@ -21,9 +21,6 @@ class UserDetail extends Model
         'gender',
     ];
 
-    protected $casts = [
-        'social_links' => 'array',
-    ];
 
     // Relationship with User
     public function user()

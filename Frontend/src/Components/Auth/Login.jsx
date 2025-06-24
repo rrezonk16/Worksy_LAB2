@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Login_background from "../../Assets/work.jpg";
-
+import company from "../../assets/company_building.svg";
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -104,7 +104,22 @@ const Login = () => {
               <a href="/register">Don't have an account?</a>
             </div>
           </form>
+         <div className="mt-6 text-gray-600 text-sm space-y-3">
+  <button
+    onClick={() => navigate('/company/panel/login')}
+    className="w-full flex items-center justify-center gap-2 px-4 py-4 border bg-gray-200 border-gray-300 rounded-lg hover:bg-gray-100 transition"
+  >
+    <img src={company} className=" w-8 mr-2" alt="" />
+    Login with Company User
+  </button>
+
+ 
+</div>
+
         </div>
+        
+        
+
       </div>
     </div>
   );
